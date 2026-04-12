@@ -1,0 +1,47 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    match /mainCategories/{id} {
+      allow read, write: if isAuth();
+    }
+
+    match /subCategories/{id} {
+      allow read, write: if isAuth();
+    }
+
+    match /productNames/{id} {
+      allow read, write: if isAuth();
+    }
+
+    match /products/{id} {
+      allow read, write: if isAuth();
+    }
+
+    match /categories/{id} {
+      allow read, write: if isAuth();
+    }
+
+    match /inventoryLogs/{id} {
+      allow read, create: if isAuth();
+      allow update, delete: if false;
+    }
+
+    match /auditSessions/{id} {
+      allow read, write: if isAuth();
+    }
+
+    match /settings/{id} {
+      allow read, write: if isAuth();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
