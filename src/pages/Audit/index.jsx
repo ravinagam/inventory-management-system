@@ -55,7 +55,7 @@ function AuditHistory() {
           {expanded === session.id && (
             <div className="border-t divide-y">
               {(session.items || []).map((item) => (
-                <div key={item.productId} className="px-4 py-3 text-sm">
+                <div key={item.productId} className="px-4 py-3 text-sm space-y-1">
                   <div className="flex justify-between items-center">
                     <span className="font-medium text-gray-800">{item.productName}</span>
                     <div className="flex gap-3 text-xs text-gray-500">
@@ -68,7 +68,9 @@ function AuditHistory() {
                     </div>
                   </div>
                   {item.reason && (
-                    <p className="text-xs text-gray-400 mt-0.5">{item.reason}</p>
+                    <p className="text-xs text-gray-500">
+                      Reason: <span className="font-medium text-gray-700">{item.reason}</span>
+                    </p>
                   )}
                 </div>
               ))}
@@ -87,7 +89,7 @@ export default function DailyAudit() {
   const [tab, setTab] = useState('audit') // 'audit' | 'history'
 
   async function handleSubmit() {
-    const incomplete = auditItems.filter((i) => i.actual === '')
+    const incomplete = auditItems.filter((i) => i.actual === '' || i.actual === null || i.actual === undefined)
     if (incomplete.length > 0) return alert('Please enter actual count for all items')
     setSubmitting(true)
     try {

@@ -21,7 +21,7 @@ export function useAudit(products) {
       productName: p.displayName || p.name,
       sku: p.sku || '',
       expected: p.currentStock ?? 0,
-      actual: '',
+      actual: String(p.currentStock ?? 0),
       reason: '',
     }))
     addDoc(collection(db, 'auditSessions'), {
