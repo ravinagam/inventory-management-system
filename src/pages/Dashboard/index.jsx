@@ -39,12 +39,19 @@ export default function Dashboard() {
         ) : lowStock.length === 0 ? (
           <p className="text-sm text-green-600">All products are well stocked!</p>
         ) : (
-          lowStock.map((item) => (
-            <div key={item.id} className="flex justify-between items-center text-sm py-1 border-b last:border-0">
-              <span className="text-gray-700">{item.name}</span>
-              <span className="text-red-500 font-medium">{item.currentStock} left</span>
-            </div>
-          ))
+          <div className="divide-y divide-gray-100">
+            {lowStock.map((item) => (
+              <div key={item.id} className="flex items-center justify-between py-2">
+                <span className="text-sm text-gray-800 flex-1 min-w-0 truncate pr-2">
+                  {item.displayName || item.name}
+                </span>
+                <div className="flex items-center gap-3 shrink-0 text-xs">
+                  <span className="text-gray-400">Min: <span className="font-medium text-gray-600">{item.minStock ?? 0}</span></span>
+                  <span className="text-red-500 font-semibold">{item.currentStock ?? 0} left</span>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </section>
 
