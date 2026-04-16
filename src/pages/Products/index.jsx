@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Search, Plus, ChevronRight, Settings } from 'lucide-react'
+import { Search, ChevronRight } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useProducts } from '../../hooks/useProducts'
 import { useMainCategories } from '../../hooks/useHierarchy'
@@ -22,21 +22,12 @@ export default function ProductList() {
   return (
     <div className="p-4 space-y-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <h1 className="text-xl font-bold text-gray-800">Products</h1>
-          <button
-            onClick={() => navigate('/settings')}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-            title="Settings"
-          >
-            <Settings size={16} />
-          </button>
-        </div>
+        <h1 className="text-xl font-bold text-gray-800">Products</h1>
         <button
-          onClick={() => navigate('/products/add')}
+          onClick={() => navigate('/config', { state: { tab: 2 } })}
           className="flex items-center gap-1 bg-blue-600 text-white text-sm px-3 py-2 rounded-xl font-medium"
         >
-          <Plus size={16} /> Add SKU
+          Add Product
         </button>
       </div>
 

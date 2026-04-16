@@ -91,6 +91,11 @@ export default function SKUForm() {
     getDoc(doc(db, 'products', id)).then((snap) => {
       if (snap.exists()) {
         const d = snap.data()
+        // Config-sourced products have their own edit page
+        if (d.source === 'config') {
+          navigate(`/config/products/${id}`, { replace: true })
+          return
+        }
         setMainCategory(d.mainCategoryId ? { id: d.mainCategoryId, name: d.mainCategoryName } : null)
         setSubCategory(d.subCategoryId   ? { id: d.subCategoryId,  name: d.subCategoryName }  : null)
         setProductName(d.productNameId   ? { id: d.productNameId,  name: d.productNameStr }   : null)

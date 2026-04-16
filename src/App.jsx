@@ -12,6 +12,9 @@ import InventoryUpdate from './pages/Inventory'
 import DailyAudit from './pages/Audit'
 import Reports from './pages/Reports'
 import SettingsPage from './pages/Settings'
+import CompanyNamePage from './pages/Settings/CompanyName'
+import ConfigPage from './pages/Config'
+import EditProduct from './pages/Config/EditProduct'
 
 export default function App() {
   const setUser = useAuthStore((s) => s.setUser)
@@ -36,6 +39,9 @@ export default function App() {
             <Route path="/audit" element={<DailyAudit />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/settings/company" element={<CompanyNamePage />} />
+            <Route path="/config" element={<ConfigPage />} />
+            <Route path="/config/products/:id" element={<EditProduct />} />
           </Routes>
         </Layout>
       </ProtectedRoute>

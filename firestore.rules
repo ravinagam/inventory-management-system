@@ -40,6 +40,14 @@ service cloud.firestore {
       allow read, write: if isAuth();
     }
 
+    match /hierarchyConfig/{id} {
+      allow read, write: if isAuth();
+    }
+
+    match /hierarchyData/{id} {
+      allow read, write: if isAuth();
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

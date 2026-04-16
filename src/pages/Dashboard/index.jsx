@@ -1,6 +1,4 @@
-import { AlertTriangle, ClipboardList, Activity, LogOut } from 'lucide-react'
-import { signOut } from 'firebase/auth'
-import { auth } from '../../lib/firebase'
+import { AlertTriangle, ClipboardList, Activity } from 'lucide-react'
 import { useProducts } from '../../hooks/useProducts'
 import { useInventoryLogs } from '../../hooks/useInventory'
 import { useTodayAuditItems } from '../../hooks/useAuditHistory'
@@ -23,15 +21,7 @@ export default function Dashboard() {
 
   return (
     <div className="p-4 space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-gray-800">Inventory Summary</h1>
-        <button
-          onClick={() => signOut(auth)}
-          className="flex items-center gap-1 text-xs text-gray-400 hover:text-red-500 transition-colors"
-        >
-          <LogOut size={15} /> Sign Out
-        </button>
-      </div>
+      <h1 className="text-xl font-bold text-gray-800">Inventory Summary</h1>
 
       {/* Low Stock Alerts */}
       <section className="bg-white rounded-2xl shadow-sm p-4 space-y-2">

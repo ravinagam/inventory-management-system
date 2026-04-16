@@ -1,0 +1,24 @@
+
+
+
+Inventory management system - User friendly UI on web and app without any ambiguity and complexity for small businesses.
+
+1.hiearchy levels
+	Main category
+	sub category
+	product name
+	variant
+	size
+
+2.allow missing sub cateogry and variant as some products don't have them.
+
+3.Every sellable item must have a SKU
+
+4.display name of sku
+	if variant exists:
+	  name = Product + Variant + Size
+	else:
+	  name = Product + Size
+5. generate sku
+6. make sure all hiearchy levels are present while adding product
+7.

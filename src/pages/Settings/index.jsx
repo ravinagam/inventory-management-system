@@ -1,74 +1,46 @@
-import { useState, useEffect } from 'react'
-import { ArrowLeft, Save } from 'lucide-react'
+import { Store, Layers, ArrowLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { useSettings, saveSettings } from '../../hooks/useSettings'
+import { useSettings } from '../../hooks/useSettings'
 
 export default function SettingsPage() {
   const navigate = useNavigate()
-  const { settings, loading } = useSettings()
-  const [companyName, setCompanyName] = useState('')
-  const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
-
-  useEffect(() => {
-    if (!loading) setCompanyName(settings.companyName || '')
-  }, [settings, loading])
-
-  async function handleSave(e) {
-    e.preventDefault()
-    setSaving(true)
-    try {
-      await saveSettings({ companyName: companyName.trim() })
-      setSaved(true)
-      setTimeout(() => setSaved(false), 2500)
-    } catch {
-      alert('Failed to save settings.')
-    } finally {
-      setSaving(false)
-    }
-  }
+  const { settings } = useSettings()
 
   return (
-    <div className="p-4 space-y-5">
-      <div className="flex items-center gap-3">
-        <button onClick={() => navigate(-1)} className="text-gray-500 hover:text-gray-700">
-          <ArrowLeft size={22} />
-        </button>
-        <h1 className="text-xl font-bold text-gray-800">Settings</h1>
-      </div>
+    <div className="p-4 space-y-4">
+      <h1 className="text-xl font-bold text-gray-800">Settings</h1>
 
-      <form onSubmit={handleSave} className="space-y-4">
-        <div className="bg-white rounded-2xl shadow-sm p-4 space-y-4">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Shop Info</p>
-
-          <div className="space-y-1">
-            <label className="text-sm font-medium text-gray-700">Company / Shop Name</label>
-            <input
-              type="text"
-              value={companyName}
-              onChange={(e) => setCompanyName(e.target.value)}
-              onPaste={(e) => {
-                const pasted = e.clipboardData.getData('text')
-                setCompanyName(pasted)
-                e.preventDefault()
-              }}
-              placeholder="e.g. Sri Murugan Stores"
-              autoComplete="organization"
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <p className="text-xs text-gray-400">Displayed at the top of the app.</p>
-          </div>
+      {/* Company Name */}
+      <button
+        onClick={() => navigate('/settings/company')}
+        className="w-full flex items-center gap-3 bg-white rounded-2xl shadow-sm px-4 py-4 text-left"
+      >
+        <div className="bg-orange-50 rounded-xl p-2">
+          <Store size={18} className="text-orange-500" />
         </div>
+        <div className="flex-1">
+          <p className="text-sm font-semibold text-gray-800">Company / Shop Name</p>
+          <p className="text-xs text-gray-400 truncate">
+            {settings.companyName || 'Not set — tap to configure'}
+          </p>
+        </div>
+        <ArrowLeft size={16} className="text-gray-400 rotate-180" />
+      </button>
 
-        <button
-          type="submit"
-          disabled={saving}
-          className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-3 rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors disabled:opacity-60"
-        >
-          <Save size={16} />
-          {saving ? 'Saving...' : saved ? 'Saved!' : 'Save Settings'}
-        </button>
-      </form>
+      {/* Product Hierarchy */}
+      <button
+        onClick={() => navigate('/config')}
+        className="w-full flex items-center gap-3 bg-white rounded-2xl shadow-sm px-4 py-4 text-left"
+      >
+        <div className="bg-blue-50 rounded-xl p-2">
+          <Layers size={18} className="text-blue-600" />
+        </div>
+        <div className="flex-1">
+          <p className="text-sm font-semibold text-gray-800">Product Hierarchy</p>
+          <p className="text-xs text-gray-400">Configure levels, manage data, add products</p>
+        </div>
+        <ArrowLeft size={16} className="text-gray-400 rotate-180" />
+      </button>
     </div>
   )
 }

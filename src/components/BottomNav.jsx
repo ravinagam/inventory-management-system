@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, Package, RefreshCw, ClipboardList, BarChart2 } from 'lucide-react'
+import { LayoutDashboard, Package, RefreshCw, ClipboardList, BarChart2, Settings } from 'lucide-react'
 
 const navItems = [
   { to: '/',          icon: LayoutDashboard, label: 'Dashboard' },
@@ -7,6 +7,7 @@ const navItems = [
   { to: '/inventory', icon: RefreshCw,       label: 'Inventory' },
   { to: '/audit',     icon: ClipboardList,   label: 'Audit'     },
   { to: '/reports',   icon: BarChart2,       label: 'Reports'   },
+  { to: '/settings',  icon: Settings,        label: 'Settings'  },
 ]
 
 export default function BottomNav() {

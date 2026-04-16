@@ -10,7 +10,8 @@ export default function InventoryUpdate() {
   const navigate = useNavigate()
   const { products } = useProducts()
   const [form, setForm] = useState({ productId: '', action: 'Stock In', quantity: '', notes: '' })
-  const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(false)
+  const [saved, setSaved] = useState(false)
 
   function handleChange(field, value) {
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -29,7 +30,9 @@ export default function InventoryUpdate() {
         quantity: form.quantity,
         notes: form.notes,
       })
-      navigate('/')
+      setSaved(true)
+      setForm((prev) => ({ ...prev, quantity: '', notes: '' }))
+      setTimeout(() => setSaved(false), 2500)
     } catch (err) {
       alert('Failed to update inventory. Please try again.')
     } finally {
@@ -58,7 +61,7 @@ export default function InventoryUpdate() {
             <option value="">Choose product...</option>
             {products.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.displayName || p.name} {p.sku ? `[${p.sku}]` : ''} — Stock: {p.currentStock ?? 0}
+                {p.displayName || p.name} — Stock: {p.currentStock ?? 0}
               </option>
             ))}
           </select>
@@ -120,7 +123,7 @@ export default function InventoryUpdate() {
           disabled={loading}
           className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors disabled:opacity-60"
         >
-          {loading ? 'Saving...' : 'Save'}
+          {loading ? 'Saving…' : saved ? 'Saved!' : 'Save'}
         </button>
       </form>
     </div>

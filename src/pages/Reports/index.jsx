@@ -3,6 +3,22 @@ import { Download, Search } from 'lucide-react'
 import { useProducts } from '../../hooks/useProducts'
 import { useMainCategories } from '../../hooks/useHierarchy'
 
+// Normalize both old-style and config-sourced products to the same flat shape
+function normalize(p) {
+  if (p.source === 'config' && Array.isArray(p.hierarchyLevels)) {
+    const lvl = (i) => p.hierarchyLevels.find((l) => l.levelIndex === i)?.itemName || ''
+    return {
+      ...p,
+      mainCategoryName: lvl(0),
+      subCategoryName:  lvl(1),
+      productNameStr:   lvl(2),
+      variant:          lvl(3),
+      size:             lvl(4),
+    }
+  }
+  return p
+}
+
 function exportCSV(products) {
   const headers = [
     'Main Category', 'Sub Category', 'Product Name',
@@ -52,7 +68,9 @@ export default function Reports() {
   const [search,   setSearch]   = useState('')
   const [mainCat,  setMainCat]  = useState('All')
 
-  const filtered = products.filter((p) => {
+  const normalized = products.map(normalize)
+
+  const filtered = normalized.filter((p) => {
     const text = [p.displayName, p.sku, p.productNameStr, p.name].join(' ').toLowerCase()
     return (
       text.includes(search.toLowerCase()) &&
