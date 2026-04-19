@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { ArrowLeft, Save, User, Mail, AtSign } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { updateProfile } from 'firebase/auth'
-import { doc, getDoc, updateDoc } from 'firebase/firestore'
+import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { auth, db } from '../../lib/firebase'
 import useAuthStore from '../../store/authStore'
 
@@ -43,11 +43,11 @@ export default function ProfilePage() {
       // Update Firebase Auth display name
       await updateProfile(auth.currentUser, { displayName: displayName.trim() })
 
-      // Update Firestore profile
-      await updateDoc(doc(db, 'users', user.uid), {
+      // Create or merge Firestore profile (existing users may not have a doc yet)
+      await setDoc(doc(db, 'users', user.uid), {
         displayName: displayName.trim(),
         email: email.trim() || null,
-      })
+      }, { merge: true })
 
       setSaved(true)
       setTimeout(() => setSaved(false), 2500)
