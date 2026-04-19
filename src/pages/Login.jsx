@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore'
 import { auth, db } from '../lib/firebase'
@@ -106,6 +107,7 @@ function SubmitBtn({ loading, label }) {
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function Login() {
+  const navigate = useNavigate()
   const [mode, setMode] = useState('login')
 
   // Login fields
@@ -136,6 +138,7 @@ export default function Login() {
         return
       }
       await signInWithEmailAndPassword(auth, authEmail, loginPw)
+      navigate('/', { replace: true })
     } catch (err) {
       setError(friendlyError(err.code))
     } finally {
@@ -176,6 +179,7 @@ export default function Login() {
         authEmail,
         createdAt: serverTimestamp(),
       })
+      navigate('/', { replace: true })
     } catch (err) {
       setError(friendlyError(err.code))
     } finally {
