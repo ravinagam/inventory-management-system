@@ -41,6 +41,20 @@ export default function ProductAssign({ levels, optionalLevels = [] }) {
 
   const { products } = useProducts()
 
+  // Auto-populate product name from selections
+  useEffect(() => {
+    if (!userEditedName) setProductName(autoProductName(selections))
+  }, [selections, userEditedName])
+
+  // Auto-populate SKU from product name + selections
+  const autoSKU = buildAutoSKU(productName, selections)
+  useEffect(() => {
+    if (!skuEdited) setCustomSKU(autoSKU)
+  }, [autoSKU, skuEdited])
+
+  const sku = skuEdited ? customSKU : autoSKU
+
+  // Duplicate checks — must come after `sku` is declared
   useEffect(() => {
     if (!productName.trim()) { setDupNameError(''); return }
     const lower = productName.trim().toLowerCase()
@@ -54,19 +68,6 @@ export default function ProductAssign({ levels, optionalLevels = [] }) {
     const dup = products.find(p => (p.sku || '').toLowerCase() === lower)
     setDupSkuError(dup ? `Product code "${sku.trim()}" is already in use.` : '')
   }, [sku, products])
-
-  // Auto-populate product name from selections
-  useEffect(() => {
-    if (!userEditedName) setProductName(autoProductName(selections))
-  }, [selections, userEditedName])
-
-  // Auto-populate SKU from product name + selections
-  const autoSKU = buildAutoSKU(productName, selections)
-  useEffect(() => {
-    if (!skuEdited) setCustomSKU(autoSKU)
-  }, [autoSKU, skuEdited])
-
-  const sku = skuEdited ? customSKU : autoSKU
 
   function handleSelect(levelIndex, itemId, itemName) {
     setSelections((prev) => {
