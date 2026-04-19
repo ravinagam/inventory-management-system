@@ -115,23 +115,22 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Username — read only */}
-          {username && (
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-wider" style={{ color: '#9ca3af' }}>Username</label>
-              <div className="relative">
-                <AtSign size={15} className="absolute left-3.5 top-3.5" style={{ color: '#9ca3af' }} />
-                <input
-                  type="text"
-                  value={username}
-                  readOnly
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border text-sm"
-                  style={{ background: '#f1f5f9', borderColor: '#e5e7eb', color: '#6b7280', cursor: 'not-allowed' }}
-                />
-              </div>
-              <p className="text-xs" style={{ color: '#9ca3af' }}>Username cannot be changed.</p>
+          {/* Username — always shown, read only */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold uppercase tracking-wider" style={{ color: '#9ca3af' }}>Username</label>
+            <div className="relative">
+              <AtSign size={15} className="absolute left-3.5 top-3.5" style={{ color: '#9ca3af' }} />
+              <input
+                type="text"
+                value={username}
+                readOnly
+                placeholder="Not set"
+                className="w-full pl-10 pr-4 py-3 rounded-xl border text-sm"
+                style={{ background: '#f1f5f9', borderColor: '#e5e7eb', color: username ? '#374151' : '#9ca3af', cursor: 'not-allowed' }}
+              />
             </div>
-          )}
+            <p className="text-xs" style={{ color: '#9ca3af' }}>Username cannot be changed after registration.</p>
+          </div>
 
           {/* Email */}
           <div className="space-y-1.5">

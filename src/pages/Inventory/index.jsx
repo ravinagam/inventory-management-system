@@ -159,10 +159,10 @@ export default function InventoryUpdate() {
   }
 
   return (
-    <div className="p-4 space-y-4 pb-24" style={{ background: '#f1f5f9', minHeight: '100vh' }}>
+    <div style={{ background: '#f1f5f9', minHeight: '100vh' }}>
 
       {/* Header */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 px-4 pt-4 pb-3">
         <button
           onClick={() => navigate(-1)}
           className="w-9 h-9 rounded-xl flex items-center justify-center shadow-sm"
@@ -173,10 +173,10 @@ export default function InventoryUpdate() {
         <h1 className="text-xl font-black tracking-tight" style={{ color: '#111827' }}>Update Inventory</h1>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="px-4 pb-4 space-y-3">
 
         {/* Select Product */}
-        <div className="bg-white rounded-2xl shadow-sm p-4 space-y-2">
+        <div className="bg-white rounded-2xl shadow-sm px-3 py-3 space-y-2">
           <p className="text-xs font-bold uppercase tracking-wider" style={{ color: '#9ca3af' }}>Select Product</p>
           <ProductSearch
             products={products}
@@ -186,7 +186,7 @@ export default function InventoryUpdate() {
         </div>
 
         {/* Action */}
-        <div className="bg-white rounded-2xl shadow-sm p-4 space-y-3">
+        <div className="bg-white rounded-2xl shadow-sm px-3 py-3 space-y-2">
           <p className="text-xs font-bold uppercase tracking-wider" style={{ color: '#9ca3af' }}>Action</p>
           <div className="grid grid-cols-3 gap-2">
             {ACTIONS.map(({ key, label, icon: Icon, active }) => {
@@ -196,12 +196,12 @@ export default function InventoryUpdate() {
                   key={key}
                   type="button"
                   onClick={() => handleChange('action', key)}
-                  className="flex flex-col items-center gap-1.5 py-3 rounded-2xl border-2 font-bold text-xs transition-all"
+                  className="flex flex-col items-center gap-1 py-2.5 rounded-xl border-2 font-bold text-xs transition-all"
                   style={isSelected
                     ? { background: active.bg, color: active.color, borderColor: active.border }
                     : { background: '#f9fafb', color: '#9ca3af', borderColor: '#f1f5f9' }}
                 >
-                  <Icon size={18} strokeWidth={2} />
+                  <Icon size={16} strokeWidth={2} />
                   {label}
                 </button>
               )
@@ -210,7 +210,7 @@ export default function InventoryUpdate() {
         </div>
 
         {/* Quantity + Preview */}
-        <div className="bg-white rounded-2xl shadow-sm p-4 space-y-3">
+        <div className="bg-white rounded-2xl shadow-sm px-3 py-3 space-y-2">
           <p className="text-xs font-bold uppercase tracking-wider" style={{ color: '#9ca3af' }}>
             {form.action === 'Adjust' ? 'Set Stock To' : 'Quantity'}
           </p>
@@ -220,24 +220,22 @@ export default function InventoryUpdate() {
             value={form.quantity}
             onChange={(e) => handleChange('quantity', e.target.value)}
             placeholder="Enter quantity"
-            className="w-full px-4 py-3 rounded-2xl border text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2.5 rounded-xl border text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500"
             style={{ background: '#f9fafb', borderColor: '#e5e7eb', color: '#111827' }}
           />
-
-          {/* Stock preview */}
           {previewStock && (
-            <div className="flex items-center justify-center gap-3 py-3 rounded-xl"
+            <div className="flex items-center justify-center gap-3 py-2 rounded-xl"
               style={{ background: previewStock.bg }}>
-              <span className="text-lg font-black" style={{ color: '#6b7280' }}>{previewStock.from}</span>
+              <span className="text-base font-black" style={{ color: '#6b7280' }}>{previewStock.from}</span>
               <span className="text-sm font-bold" style={{ color: previewStock.color }}>→</span>
-              <span className="text-2xl font-black" style={{ color: previewStock.color }}>{previewStock.to}</span>
+              <span className="text-xl font-black" style={{ color: previewStock.color }}>{previewStock.to}</span>
               <span className="text-xs font-medium" style={{ color: previewStock.color }}>units</span>
             </div>
           )}
         </div>
 
         {/* Notes */}
-        <div className="bg-white rounded-2xl shadow-sm p-4 space-y-3">
+        <div className="bg-white rounded-2xl shadow-sm px-3 py-3 space-y-2">
           <p className="text-xs font-bold uppercase tracking-wider" style={{ color: '#9ca3af' }}>
             Notes <span className="normal-case font-normal" style={{ color: '#9ca3af' }}>(optional)</span>
           </p>
@@ -245,8 +243,8 @@ export default function InventoryUpdate() {
             value={form.notes}
             onChange={(e) => handleChange('notes', e.target.value)}
             placeholder="Reason, supplier, delivery note…"
-            rows={3}
-            className="w-full px-4 py-3 rounded-2xl border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            rows={2}
+            className="w-full px-3 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
             style={{ background: '#f9fafb', borderColor: '#e5e7eb' }}
           />
         </div>
@@ -254,7 +252,7 @@ export default function InventoryUpdate() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-4 rounded-2xl text-white font-black text-sm disabled:opacity-60 transition-all"
+          className="w-full py-3.5 rounded-2xl text-white font-black text-sm disabled:opacity-60 transition-all"
           style={{
             background: saved
               ? 'linear-gradient(135deg, #16a34a, #15803d)'

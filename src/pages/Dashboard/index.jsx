@@ -179,7 +179,8 @@ export default function Dashboard() {
             <p className="text-sm" style={{ color: '#9ca3af' }}>No inventory activity yet.</p>
           </div>
         ) : (
-          <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-sm overflow-hidden"
+            style={{ maxHeight: '280px', overflowY: 'auto', scrollbarWidth: 'none' }}>
             {logs.map((log, i) => {
               const isIn = log.action === 'Stock In'
               const isOut = log.action === 'Stock Out'

@@ -97,42 +97,51 @@ export default function Reports() {
   const totalUnits = filtered.reduce((s, p) => s + (p.currentStock ?? 0), 0)
 
   return (
-    <div className="p-4 space-y-4 pb-24" style={{ background: '#f1f5f9', minHeight: '100vh' }}>
+    <div style={{
+      height: 'calc(100vh - 4.5rem - 3.75rem)',
+      display: 'flex',
+      flexDirection: 'column',
+      background: '#f1f5f9',
+      overflow: 'hidden',
+    }}>
 
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-black tracking-tight" style={{ color: '#111827' }}>Reports</h1>
-        <button
-          onClick={() => exportCSV(filtered)}
-          className="flex items-center gap-1.5 text-sm font-bold px-4 py-2.5 rounded-2xl border"
-          style={{ background: '#fff', color: '#374151', borderColor: '#e5e7eb', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}
-        >
-          <Download size={14} /> Export CSV
-        </button>
-      </div>
+      {/* ── Fixed header (title + stats + search + pills) ── */}
+      <div style={{ flexShrink: 0, padding: '14px 16px 8px', background: '#f1f5f9' }}>
 
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-3">
-        <div className="bg-white rounded-2xl p-3 text-center shadow-sm">
-          <p className="text-xl font-black" style={{ color: '#1d4ed8' }}>{filtered.length}</p>
-          <p className="text-xs font-medium mt-0.5" style={{ color: '#6b7280' }}>Products</p>
+        {/* Title + Export */}
+        <div className="flex items-center justify-between mb-3">
+          <h1 className="text-2xl font-black tracking-tight" style={{ color: '#111827' }}>Reports</h1>
+          <button
+            onClick={() => exportCSV(filtered)}
+            className="flex items-center gap-1.5 text-sm font-bold px-4 py-2.5 rounded-2xl border"
+            style={{ background: '#fff', color: '#374151', borderColor: '#e5e7eb', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}
+          >
+            <Download size={14} /> Export CSV
+          </button>
         </div>
-        <div className="bg-white rounded-2xl p-3 text-center shadow-sm">
-          <p className="text-xl font-black" style={{ color: lowCount > 0 ? '#dc2626' : '#16a34a' }}>{lowCount}</p>
-          <p className="text-xs font-medium mt-0.5" style={{ color: '#6b7280' }}>Low Stock</p>
-        </div>
-        <div className="bg-white rounded-2xl p-3 text-center shadow-sm">
-          <p className="text-xl font-black" style={{ color: '#16a34a' }}>{totalUnits}</p>
-          <p className="text-xs font-medium mt-0.5" style={{ color: '#6b7280' }}>Total Units</p>
-        </div>
-      </div>
 
-      {/* Search */}
-      <div className="relative">
-        <Search size={15} className="absolute left-3.5 top-3.5" style={{ color: '#9ca3af' }} />
-        <input
-          type="text"
-          placeholder="Search by name or product code…"
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-3 mb-3">
+          <div className="bg-white rounded-2xl p-3 text-center shadow-sm">
+            <p className="text-xl font-black" style={{ color: '#1d4ed8' }}>{filtered.length}</p>
+            <p className="text-xs font-medium mt-0.5" style={{ color: '#6b7280' }}>Products</p>
+          </div>
+          <div className="bg-white rounded-2xl p-3 text-center shadow-sm">
+            <p className="text-xl font-black" style={{ color: lowCount > 0 ? '#dc2626' : '#16a34a' }}>{lowCount}</p>
+            <p className="text-xs font-medium mt-0.5" style={{ color: '#6b7280' }}>Low Stock</p>
+          </div>
+          <div className="bg-white rounded-2xl p-3 text-center shadow-sm">
+            <p className="text-xl font-black" style={{ color: '#16a34a' }}>{totalUnits}</p>
+            <p className="text-xs font-medium mt-0.5" style={{ color: '#6b7280' }}>Total Units</p>
+          </div>
+        </div>
+
+        {/* Search */}
+        <div className="relative mb-3">
+          <Search size={15} className="absolute left-3.5 top-3.5" style={{ color: '#9ca3af' }} />
+          <input
+            type="text"
+            placeholder="Search by name or product code…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full pl-10 pr-4 py-3 rounded-2xl border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -140,31 +149,33 @@ export default function Reports() {
         />
       </div>
 
-      {/* Category pills */}
-      <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
-        {['All', ...mainCategories.map((c) => c.name)].map((cat) => (
-          <button
-            key={cat}
-            onClick={() => setMainCat(cat)}
-            className="shrink-0 px-4 py-1.5 rounded-full text-xs font-bold border transition-colors"
-            style={mainCat === cat
-              ? { background: '#1d4ed8', color: '#fff', borderColor: '#1d4ed8' }
-              : { background: '#fff', color: '#6b7280', borderColor: '#e5e7eb' }}
-          >
-            {cat}
-          </button>
-        ))}
+        {/* Category pills */}
+        <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+          {['All', ...mainCategories.map((c) => c.name)].map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setMainCat(cat)}
+              className="shrink-0 px-4 py-1.5 rounded-full text-xs font-bold border transition-colors"
+              style={mainCat === cat
+                ? { background: '#1d4ed8', color: '#fff', borderColor: '#1d4ed8' }
+                : { background: '#fff', color: '#6b7280', borderColor: '#e5e7eb' }}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Product cards */}
-      {loading ? (
-        <div className="flex justify-center py-16">
-          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-        </div>
-      ) : filtered.length === 0 ? (
-        <p className="text-center text-sm py-10" style={{ color: '#9ca3af' }}>No products found.</p>
-      ) : (
-        <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+      {/* ── Scrollable results ── */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '4px 16px 16px', scrollbarWidth: 'none' }}>
+        {loading ? (
+          <div className="flex justify-center py-16">
+            <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : filtered.length === 0 ? (
+          <p className="text-center text-sm py-10" style={{ color: '#9ca3af' }}>No products found.</p>
+        ) : (
+          <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
           {filtered.map((p, i) => {
             const isLow = (p.currentStock ?? 0) < (p.minStock ?? 0)
             const col = categoryColor(p.mainCategoryName, mainCategories)
@@ -234,7 +245,8 @@ export default function Reports() {
             )
           })}
         </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }
