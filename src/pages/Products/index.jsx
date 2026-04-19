@@ -11,7 +11,9 @@ export default function ProductList() {
   const { products, loading }     = useProducts()
   const { mainCategories }        = useMainCategories()
 
-  const filtered = products.filter((p) => {
+  const filtered = products.slice().sort((a, b) =>
+    (a.displayName || a.name || '').localeCompare(b.displayName || b.name || '')
+  ).filter((p) => {
     const name    = (p.displayName || p.name || '').toLowerCase()
     const sku     = (p.sku || '').toLowerCase()
     const matchSearch = name.includes(search.toLowerCase()) || sku.includes(search.toLowerCase())
