@@ -48,6 +48,17 @@ service cloud.firestore {
       allow read, write: if isAuth();
     }
 
+    // Public read for username → authEmail lookup during login
+    match /usernames/{username} {
+      allow read: if true;
+      allow write: if isAuth();
+    }
+
+    // User profiles — readable and writable only by the owner
+    match /users/{uid} {
+      allow read, write: if isAuth() && request.auth.uid == uid;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

@@ -1,4 +1,4 @@
-import { ChevronRight, Store, Layers, LogOut } from 'lucide-react'
+import { ChevronRight, Store, Layers, LogOut, UserCircle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { signOut } from 'firebase/auth'
 import { auth } from '../../lib/firebase'
@@ -31,9 +31,7 @@ export default function SettingsPage() {
 
   const initials = user?.displayName
     ? user.displayName.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
-    : user?.email
-    ? user.email.slice(0, 2).toUpperCase()
-    : '?'
+    : user?.email?.slice(0, 2).toUpperCase() || '?'
 
   return (
     <div className="p-4 space-y-4 pb-24" style={{ background: '#f1f5f9', minHeight: '100vh' }}>
@@ -46,18 +44,33 @@ export default function SettingsPage() {
           style={{ background: 'linear-gradient(135deg, #1e3a5f 0%, #1d4ed8 60%, #2563eb 100%)' }}>
           <div className="w-14 h-14 rounded-full border-2 flex items-center justify-center flex-shrink-0 overflow-hidden"
             style={{ background: 'rgba(255,255,255,0.2)', borderColor: 'rgba(255,255,255,0.4)' }}>
-            {user?.photoURL ? (
-              <img src={user.photoURL} alt="profile" className="w-14 h-14 object-cover" />
-            ) : (
-              <span className="text-white text-xl font-black">{initials}</span>
-            )}
+            {user?.photoURL
+              ? <img src={user.photoURL} alt="profile" className="w-14 h-14 object-cover" />
+              : <span className="text-white text-xl font-black">{initials}</span>}
           </div>
           <div className="min-w-0">
             {user?.displayName && (
               <p className="text-base font-bold text-white truncate">{user.displayName}</p>
             )}
-            <p className="text-xs break-all" style={{ color: 'rgba(255,255,255,0.7)' }}>{user?.email}</p>
+            <p className="text-xs break-all" style={{ color: 'rgba(255,255,255,0.7)' }}>
+              {user?.email?.endsWith('@inveman.app') ? 'No email set' : user?.email}
+            </p>
           </div>
+        </div>
+      </div>
+
+      {/* Account */}
+      <div>
+        <p className="text-xs font-bold uppercase tracking-wider px-1 mb-2" style={{ color: '#9ca3af' }}>Account</p>
+        <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+          <NavRow
+            icon={UserCircle}
+            iconBg="#eff6ff"
+            iconColor="#1d4ed8"
+            label="My Profile"
+            subtitle="Display name, username, email"
+            onClick={() => navigate('/settings/profile')}
+          />
         </div>
       </div>
 
@@ -67,16 +80,16 @@ export default function SettingsPage() {
         <div className="bg-white rounded-2xl shadow-sm overflow-hidden divide-y" style={{ divideColor: '#f1f5f9' }}>
           <NavRow
             icon={Store}
-            iconBg="#eff6ff"
-            iconColor="#1d4ed8"
+            iconBg="#f0fdf4"
+            iconColor="#16a34a"
             label="Company / Shop Name"
             subtitle={settings.companyName || 'Not set — tap to configure'}
             onClick={() => navigate('/settings/company')}
           />
           <NavRow
             icon={Layers}
-            iconBg="#f0fdf4"
-            iconColor="#16a34a"
+            iconBg="#fff7ed"
+            iconColor="#ea580c"
             label="Product Hierarchy"
             subtitle="Configure levels, manage data, add products"
             onClick={() => navigate('/config')}
@@ -84,9 +97,9 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* Account */}
+      {/* Sign out */}
       <div>
-        <p className="text-xs font-bold uppercase tracking-wider px-1 mb-2" style={{ color: '#9ca3af' }}>Account</p>
+        <p className="text-xs font-bold uppercase tracking-wider px-1 mb-2" style={{ color: '#9ca3af' }}>Session</p>
         <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
           <NavRow
             icon={LogOut}
