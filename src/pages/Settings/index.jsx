@@ -34,7 +34,7 @@ export default function SettingsPage() {
     : user?.email?.slice(0, 2).toUpperCase() || '?'
 
   return (
-    <div className="p-4 space-y-4 pb-24" style={{ background: '#f1f5f9', minHeight: '100vh' }}>
+    <div className="p-4 space-y-4 pb-6" style={{ height: '100%', background: '#f1f5f9', overflowY: 'auto', scrollbarWidth: 'none' }}>
 
       <h1 className="text-2xl font-black tracking-tight" style={{ color: '#111827' }}>Settings</h1>
 

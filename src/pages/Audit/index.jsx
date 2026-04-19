@@ -135,7 +135,7 @@ export default function DailyAudit() {
   }
 
   return (
-    <div className="p-4 space-y-4 pb-24" style={{ background: '#f1f5f9', minHeight: '100vh' }}>
+    <div className="p-4 space-y-4 pb-6" style={{ height: '100%', background: '#f1f5f9', overflowY: 'auto', scrollbarWidth: 'none' }}>
 
       {/* Tab switcher */}
       <div className="flex gap-1 p-1 rounded-2xl" style={{ background: '#e2e8f0' }}>

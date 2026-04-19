@@ -98,7 +98,7 @@ export default function Reports() {
 
   return (
     <div style={{
-      height: 'calc(100vh - 4.5rem - 3.75rem)',
+      height: '100%',
       display: 'flex',
       flexDirection: 'column',
       background: '#f1f5f9',
@@ -167,7 +167,7 @@ export default function Reports() {
       </div>
 
       {/* ── Scrollable results ── */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '4px 16px 16px', scrollbarWidth: 'none' }}>
+      <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '4px 16px 16px', scrollbarWidth: 'none' }}>
         {loading ? (
           <div className="flex justify-center py-16">
             <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
@@ -210,12 +210,12 @@ export default function Reports() {
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                  <div className="flex items-center gap-2 mt-0.5" style={{ minWidth: 0 }}>
                     {breadcrumb && (
-                      <span className="text-xs truncate" style={{ color: '#9ca3af' }}>{breadcrumb}</span>
+                      <span className="text-xs" style={{ color: '#9ca3af', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0, flex: 1 }}>{breadcrumb}</span>
                     )}
                     {p.sku && (
-                      <span className="text-xs font-mono font-semibold px-1.5 py-0.5 rounded"
+                      <span className="text-xs font-mono font-semibold px-1.5 py-0.5 rounded flex-shrink-0"
                         style={{ background: col.bg, color: col.text }}>
                         {p.sku}
                       </span>

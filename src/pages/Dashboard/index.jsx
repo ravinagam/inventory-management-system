@@ -58,7 +58,8 @@ export default function Dashboard() {
   const totalUnits = products.reduce((s, p) => s + (p.currentStock ?? 0), 0)
 
   return (
-    <div className="p-4 space-y-5 pb-24" style={{ background: '#f1f5f9', minHeight: '100vh' }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#f1f5f9', overflow: 'hidden' }}>
+    <div className="p-4 space-y-5" style={{ flex: 1, overflowY: 'auto', scrollbarWidth: 'none' }}>
 
       {/* Stats row */}
       <div className="grid grid-cols-3 gap-3">
@@ -211,6 +212,7 @@ export default function Dashboard() {
           </div>
         )}
       </section>
+    </div>
     </div>
   )
 }

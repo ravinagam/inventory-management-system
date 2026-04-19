@@ -57,7 +57,7 @@ export default function ProductList() {
 
   return (
     <div style={{
-      height: 'calc(100vh - 4.5rem - 3.75rem)',
+      height: '100%',
       display: 'flex',
       flexDirection: 'column',
       background: '#f1f5f9',
