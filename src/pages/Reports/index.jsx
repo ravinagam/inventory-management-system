@@ -22,7 +22,7 @@ function normalize(p) {
 function exportCSV(products) {
   const headers = [
     'Main Category', 'Sub Category', 'Product Name',
-    'Variant', 'Size', 'Display Name', 'SKU',
+    'Variant', 'Size', 'Display Name', 'Product Code',
     'Current Stock', 'Min Stock', 'Tags',
   ]
   const rows = products.map((p) => [
@@ -56,7 +56,7 @@ const COLS = [
   { key: 'variant',          label: 'Variant' },
   { key: 'size',             label: 'Size' },
   { key: 'displayName',      label: 'Display Name' },
-  { key: 'sku',              label: 'SKU' },
+  { key: 'sku',              label: 'Product Code' },
   { key: 'currentStock',     label: 'Stock' },
   { key: 'minStock',         label: 'Min Stock' },
   { key: 'tags',             label: 'Tags' },
@@ -96,7 +96,7 @@ export default function Reports() {
         <Search size={16} className="absolute left-3 top-3 text-gray-400" />
         <input
           type="text"
-          placeholder="Search by name or SKU..."
+          placeholder="Search by name or product code..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -124,7 +124,7 @@ export default function Reports() {
       <div className="flex gap-3">
         <div className="bg-white rounded-xl shadow-sm p-3 flex-1 text-center">
           <p className="text-xl font-bold text-gray-800">{filtered.length}</p>
-          <p className="text-xs text-gray-500">Total SKUs</p>
+          <p className="text-xs text-gray-500">Total Products</p>
         </div>
         <div className="bg-white rounded-xl shadow-sm p-3 flex-1 text-center">
           <p className="text-xl font-bold text-red-500">

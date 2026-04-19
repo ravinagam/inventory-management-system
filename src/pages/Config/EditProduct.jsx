@@ -174,7 +174,7 @@ export default function EditProduct() {
           {/* SKU */}
           <div className="space-y-1">
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-gray-700">SKU Code</label>
+              <label className="text-sm font-medium text-gray-700">Product Code</label>
               {skuEdited && (
                 <button type="button" onClick={() => setSkuEdited(false)}
                   className="flex items-center gap-1 text-xs text-blue-500">
@@ -188,7 +188,7 @@ export default function EditProduct() {
               onChange={(e) => { setCustomSKU(e.target.value.toUpperCase()); setSkuEdited(true) }}
               className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <p className="text-xs text-gray-400">Edit to customise. Reset to auto-generate.</p>
+            <p className="text-xs text-gray-400">Edit to customise. Reset to auto-generate product code.</p>
           </div>
 
           {/* Stock fields */}

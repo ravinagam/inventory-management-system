@@ -36,7 +36,7 @@ export default function ProductList() {
         <Search size={16} className="absolute left-3 top-3 text-gray-400" />
         <input
           type="text"
-          placeholder="Search by name or SKU..."
+          placeholder="Search by name or product code..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -111,7 +111,7 @@ export default function ProductList() {
           })}
           {filtered.length === 0 && (
             <p className="text-center text-sm text-gray-400 py-10">
-              {products.length === 0 ? 'No SKUs yet. Tap "+ Add SKU" to begin.' : 'No results found.'}
+              {products.length === 0 ? 'No products yet. Tap "Add Product" to begin.' : 'No results found.'}
             </p>
           )}
         </div>

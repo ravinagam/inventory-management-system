@@ -141,7 +141,7 @@ export default function SKUForm() {
       return 'Select a Sub Category or choose "Skip"'
     if (!productName)     return 'Product Name is required'
     if (!size.trim())     return 'Size is required'
-    if (!sku.trim())      return 'SKU could not be generated — check all fields'
+    if (!sku.trim())      return 'Product code could not be generated — check all fields'
     return null
   }
 
@@ -186,7 +186,7 @@ export default function SKUForm() {
   }
 
   async function handleDelete() {
-    if (!confirm('Delete this SKU?')) return
+    if (!confirm('Delete this product?')) return
     await deleteProduct(id)
     navigate('/products')
   }
@@ -207,7 +207,7 @@ export default function SKUForm() {
           <button onClick={() => navigate(-1)} className="text-gray-500 hover:text-gray-700">
             <ArrowLeft size={22} />
           </button>
-          <h1 className="text-xl font-bold text-gray-800">{isEdit ? 'Edit SKU' : 'Add SKU'}</h1>
+          <h1 className="text-xl font-bold text-gray-800">{isEdit ? 'Edit Product' : 'Add Product'}</h1>
         </div>
         {isEdit && (
           <button onClick={handleDelete} className="text-red-500 hover:text-red-700">
@@ -324,7 +324,7 @@ export default function SKUForm() {
                 <p className="font-semibold text-gray-800">{displayName}</p>
               </div>
               <div>
-                <p className="text-xs text-blue-500">SKU Code</p>
+                <p className="text-xs text-blue-500">Product Code</p>
                 <div className="flex items-center gap-2">
                   <input
                     value={sku}
@@ -444,7 +444,7 @@ export default function SKUForm() {
           disabled={loading}
           className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors disabled:opacity-60"
         >
-          {loading ? 'Saving...' : isEdit ? 'Update SKU' : 'Save SKU'}
+          {loading ? 'Saving...' : isEdit ? 'Update Product' : 'Save Product'}
         </button>
       </form>
 

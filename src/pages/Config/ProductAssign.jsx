@@ -150,7 +150,7 @@ export default function ProductAssign({ levels, optionalLevels = [] }) {
         {/* SKU */}
         <div className="space-y-1">
           <div className="flex items-center justify-between">
-            <label className="text-sm font-medium text-gray-700">SKU Code</label>
+            <label className="text-sm font-medium text-gray-700">Product Code</label>
             {skuEdited && (
               <button type="button" onClick={() => setSkuEdited(false)}
                 className="flex items-center gap-1 text-xs text-blue-500">
@@ -162,10 +162,10 @@ export default function ProductAssign({ levels, optionalLevels = [] }) {
             type="text"
             value={customSKU}
             onChange={(e) => { setCustomSKU(e.target.value.toUpperCase()); setSkuEdited(true) }}
-            placeholder="Auto-generated SKU"
+            placeholder="Auto-generated product code"
             className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          <p className="text-xs text-gray-400">Auto-generated. Edit to customise.</p>
+          <p className="text-xs text-gray-400">Auto-generated product code. Edit to customise.</p>
         </div>
 
         {/* Stock fields */}
