@@ -123,8 +123,9 @@ export default function ProductList() {
             const isLow = (p.currentStock ?? 0) < (p.minStock ?? 0)
             const col = categoryColor(p.mainCategoryName, mainCategories)
             const initials = (p.displayName || p.name || '?').slice(0, 2).toUpperCase()
-            const breadcrumb = [p.mainCategoryName, p.subCategoryName, p.productNameStr]
-              .filter(Boolean).join(' › ')
+            const breadcrumb = p.source === 'config' && Array.isArray(p.hierarchyLevels)
+              ? p.hierarchyLevels.slice().sort((a, b) => a.levelIndex - b.levelIndex).map((l) => l.itemName).filter(Boolean).join(' › ')
+              : [p.mainCategoryName, p.subCategoryName, p.productNameStr].filter(Boolean).join(' › ')
 
             return (
               <div

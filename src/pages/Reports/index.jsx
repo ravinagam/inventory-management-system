@@ -5,14 +5,26 @@ import { useMainCategories } from '../../hooks/useHierarchy'
 
 function normalize(p) {
   if (p.source === 'config' && Array.isArray(p.hierarchyLevels)) {
-    const lvl = (i) => p.hierarchyLevels.find((l) => l.levelIndex === i)?.itemName || ''
+    const byIndex = (i) => p.hierarchyLevels.find((l) => l.levelIndex === i)?.itemName || ''
+
+    // Match level by name keywords so size/variant map correctly regardless of levelIndex
+    const findByName = (...keywords) => {
+      for (const kw of keywords) {
+        const found = p.hierarchyLevels.find((l) =>
+          l.levelName?.toLowerCase().includes(kw.toLowerCase())
+        )
+        if (found?.itemName) return found.itemName
+      }
+      return ''
+    }
+
     return {
       ...p,
-      mainCategoryName: lvl(0),
-      subCategoryName:  lvl(1),
-      productNameStr:   lvl(2),
-      variant:          lvl(3),
-      size:             lvl(4),
+      mainCategoryName: byIndex(0),
+      subCategoryName:  byIndex(1),
+      productNameStr:   p.displayName || p.name || '',
+      variant:          findByName('variant', 'brand', 'type', 'model', 'style') || byIndex(3),
+      size:             findByName('size', 'dimension', 'weight', 'volume', 'inch') || byIndex(4),
     }
   }
   return p
@@ -27,7 +39,7 @@ function exportCSV(products) {
   const rows = products.map((p) => [
     p.mainCategoryName   || '',
     p.subCategoryName    || '',
-    p.productNameStr     || p.name || '',
+    p.displayName        || p.name || '',
     p.variant            || '',
     p.size               || '',
     p.displayName        || p.name || '',
@@ -156,8 +168,9 @@ export default function Reports() {
           {filtered.map((p, i) => {
             const isLow = (p.currentStock ?? 0) < (p.minStock ?? 0)
             const col = categoryColor(p.mainCategoryName, mainCategories)
-            const breadcrumb = [p.mainCategoryName, p.subCategoryName, p.productNameStr]
-              .filter(Boolean).join(' › ')
+            const breadcrumb = p.source === 'config' && Array.isArray(p.hierarchyLevels)
+              ? p.hierarchyLevels.slice().sort((a, b) => a.levelIndex - b.levelIndex).map((l) => l.itemName).filter(Boolean).join(' › ')
+              : [p.mainCategoryName, p.subCategoryName, p.productNameStr].filter(Boolean).join(' › ')
 
             return (
               <div
