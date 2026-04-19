@@ -3,6 +3,7 @@ import { Save, RefreshCw } from 'lucide-react'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '../../lib/firebase'
 import { useLevelItems } from '../../hooks/useHierarchyConfig'
+import { useProducts } from '../../hooks/useProducts'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -35,6 +36,24 @@ export default function ProductAssign({ levels, optionalLevels = [] }) {
   const [saving, setSaving]               = useState(false)
   const [saved, setSaved]                 = useState(false)
   const [error, setError]                 = useState('')
+  const [dupNameError, setDupNameError]   = useState('')
+  const [dupSkuError,  setDupSkuError]    = useState('')
+
+  const { products } = useProducts()
+
+  useEffect(() => {
+    if (!productName.trim()) { setDupNameError(''); return }
+    const lower = productName.trim().toLowerCase()
+    const dup = products.find(p => (p.displayName || p.name || '').toLowerCase() === lower)
+    setDupNameError(dup ? `"${productName.trim()}" already exists.` : '')
+  }, [productName, products])
+
+  useEffect(() => {
+    if (!sku.trim()) { setDupSkuError(''); return }
+    const lower = sku.trim().toLowerCase()
+    const dup = products.find(p => (p.sku || '').toLowerCase() === lower)
+    setDupSkuError(dup ? `Product code "${sku.trim()}" is already in use.` : '')
+  }, [sku, products])
 
   // Auto-populate product name from selections
   useEffect(() => {
@@ -78,6 +97,7 @@ export default function ProductAssign({ levels, optionalLevels = [] }) {
       setError(`Required: ${missingRequired.join(', ')}`)
       return
     }
+    if (dupNameError || dupSkuError) return
     setError('')
     setSaving(true)
     try {
@@ -143,8 +163,12 @@ export default function ProductAssign({ levels, optionalLevels = [] }) {
             onChange={(e) => { setProductName(e.target.value); setUserEditedName(true) }}
             placeholder="Auto-filled from selections, or type your own…"
             autoCapitalize="words"
-            className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            style={{ borderColor: dupNameError ? '#fca5a5' : '#e5e7eb' }}
           />
+          {dupNameError && (
+            <p className="text-xs font-semibold" style={{ color: '#dc2626' }}>⚠ {dupNameError}</p>
+          )}
         </div>
 
         {/* SKU */}
@@ -163,9 +187,13 @@ export default function ProductAssign({ levels, optionalLevels = [] }) {
             value={customSKU}
             onChange={(e) => { setCustomSKU(e.target.value.toUpperCase()); setSkuEdited(true) }}
             placeholder="Auto-generated product code"
-            className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2.5 rounded-xl border text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+            style={{ borderColor: dupSkuError ? '#fca5a5' : '#e5e7eb' }}
           />
-          <p className="text-xs text-gray-400">Auto-generated product code. Edit to customise.</p>
+          {dupSkuError
+            ? <p className="text-xs font-semibold" style={{ color: '#dc2626' }}>⚠ {dupSkuError}</p>
+            : <p className="text-xs text-gray-400">Auto-generated product code. Edit to customise.</p>
+          }
         </div>
 
         {/* Stock fields */}
@@ -187,16 +215,20 @@ export default function ProductAssign({ levels, optionalLevels = [] }) {
 
       {/* Live preview */}
       {productName && (
-        <div className="bg-blue-50 rounded-2xl p-4 space-y-2">
-          <p className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Preview</p>
+        <div className={`rounded-2xl p-4 space-y-2 ${dupNameError || dupSkuError ? 'bg-red-50 border border-red-200' : 'bg-blue-50'}`}>
+          <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: dupNameError || dupSkuError ? '#dc2626' : '#1d4ed8' }}>
+            {dupNameError || dupSkuError ? 'Duplicate detected' : 'Preview'}
+          </p>
           <p className="text-sm font-semibold text-gray-800">{productName}</p>
-          <span className="text-xs font-mono text-blue-600 bg-blue-100 px-2 py-0.5 rounded">{sku}</span>
+          <span className="text-xs font-mono px-2 py-0.5 rounded" style={{ background: '#dbeafe', color: '#1d4ed8' }}>{sku}</span>
+          {dupNameError && <p className="text-xs font-semibold" style={{ color: '#dc2626' }}>⚠ {dupNameError}</p>}
+          {dupSkuError  && <p className="text-xs font-semibold" style={{ color: '#dc2626' }}>⚠ {dupSkuError}</p>}
         </div>
       )}
 
       {error && <p className="text-xs text-red-500 px-1">{error}</p>}
 
-      <button type="submit" disabled={saving}
+      <button type="submit" disabled={saving || Boolean(dupNameError) || Boolean(dupSkuError)}
         className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-3 rounded-xl font-semibold text-sm disabled:opacity-60">
         <Save size={16} />
         {saving ? 'Saving…' : saved ? 'Saved!' : 'Save Product'}

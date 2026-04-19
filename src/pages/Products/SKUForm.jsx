@@ -8,7 +8,7 @@ import {
   useSubCategories, addSubCategory,
   useProductNames, addProductName,
 } from '../../hooks/useHierarchy'
-import { addProduct, updateProduct, deleteProduct } from '../../hooks/useProducts'
+import { addProduct, updateProduct, deleteProduct, useProducts } from '../../hooks/useProducts'
 import CreatableSelect from '../../components/CreatableSelect'
 import BarcodeScanner from '../../components/BarcodeScanner'
 import { getDisplayName, generateSKU } from '../../lib/sku'
@@ -40,6 +40,11 @@ export default function SKUForm() {
   const [lookupStatus,  setLookupStatus]  = useState(null)
   const [loading,       setLoading]       = useState(false)
   const [fetching,      setFetching]      = useState(isEdit)
+  const [dupNameError,  setDupNameError]  = useState('')
+  const [dupSkuError,   setDupSkuError]   = useState('')
+
+  // All products for duplicate check
+  const { products } = useProducts()
 
   // Hierarchy data
   const { mainCategories } = useMainCategories()
@@ -61,6 +66,21 @@ export default function SKUForm() {
 
   // Use custom SKU if user edited, else auto
   const sku = skuEdited ? customSKU : autoSKU
+
+  // Duplicate checks (against already-loaded products list)
+  useEffect(() => {
+    if (!displayName) { setDupNameError(''); return }
+    const lower = displayName.toLowerCase()
+    const dup = products.find(p => p.id !== id && (p.displayName || p.name || '').toLowerCase() === lower)
+    setDupNameError(dup ? `"${displayName}" already exists.` : '')
+  }, [displayName, products, id])
+
+  useEffect(() => {
+    if (!sku) { setDupSkuError(''); return }
+    const lower = sku.toLowerCase()
+    const dup = products.find(p => p.id !== id && (p.sku || '').toLowerCase() === lower)
+    setDupSkuError(dup ? `Product code "${sku}" is already in use.` : '')
+  }, [sku, products, id])
 
   // When main category changes, reset downstream
   function handleMainCategoryChange(val) {
@@ -142,6 +162,8 @@ export default function SKUForm() {
     if (!productName)     return 'Product Name is required'
     if (!size.trim())     return 'Size is required'
     if (!sku.trim())      return 'Product code could not be generated — check all fields'
+    if (dupNameError)     return dupNameError
+    if (dupSkuError)      return dupSkuError
     return null
   }
 
@@ -200,7 +222,7 @@ export default function SKUForm() {
   }
 
   return (
-    <div className="p-4 space-y-5">
+    <div className="p-4 space-y-5 pb-6" style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden', scrollbarWidth: 'none' }}>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -316,12 +338,15 @@ export default function SKUForm() {
 
         {/* ── Auto-generated Preview ─────────────────────── */}
         {displayName && (
-          <section className="bg-blue-50 border border-blue-100 rounded-2xl p-4 space-y-3">
+          <section className={`border rounded-2xl p-4 space-y-3 ${dupNameError || dupSkuError ? 'bg-red-50 border-red-200' : 'bg-blue-50 border-blue-100'}`}>
             <p className="text-xs font-semibold text-blue-400 uppercase tracking-wide">Generated</p>
             <div className="space-y-2">
               <div>
                 <p className="text-xs text-blue-500">Display Name</p>
                 <p className="font-semibold text-gray-800">{displayName}</p>
+                {dupNameError && (
+                  <p className="text-xs font-semibold mt-1" style={{ color: '#dc2626' }}>⚠ {dupNameError}</p>
+                )}
               </div>
               <div>
                 <p className="text-xs text-blue-500">Product Code</p>
@@ -329,7 +354,8 @@ export default function SKUForm() {
                   <input
                     value={sku}
                     onChange={(e) => { setCustomSKU(e.target.value); setSkuEdited(true) }}
-                    className="flex-1 px-3 py-1.5 rounded-xl border border-blue-200 bg-white text-sm font-mono font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="flex-1 px-3 py-1.5 rounded-xl border bg-white text-sm font-mono font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    style={{ borderColor: dupSkuError ? '#fca5a5' : '#bfdbfe' }}
                   />
                   {skuEdited && (
                     <button
@@ -341,7 +367,10 @@ export default function SKUForm() {
                     </button>
                   )}
                 </div>
-                <p className="text-xs text-blue-400 mt-0.5">Auto-generated. Tap to customise.</p>
+                {dupSkuError
+                  ? <p className="text-xs font-semibold mt-0.5" style={{ color: '#dc2626' }}>⚠ {dupSkuError}</p>
+                  : <p className="text-xs text-blue-400 mt-0.5">Auto-generated. Tap to customise.</p>
+                }
               </div>
             </div>
           </section>
@@ -441,7 +470,7 @@ export default function SKUForm() {
         {/* Save */}
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || Boolean(dupNameError) || Boolean(dupSkuError)}
           className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors disabled:opacity-60"
         >
           {loading ? 'Saving...' : isEdit ? 'Update Product' : 'Save Product'}

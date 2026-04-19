@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, ScanLine, X, Trash2 } from 'lucide-react'
 import { useCategories, addCategory } from '../../hooks/useCategories'
-import { addProduct, updateProduct, deleteProduct } from '../../hooks/useProducts'
+import { addProduct, updateProduct, deleteProduct, useProducts } from '../../hooks/useProducts'
 import { doc, getDoc } from 'firebase/firestore'
 import { db } from '../../lib/firebase'
 import BarcodeScanner from '../../components/BarcodeScanner'
@@ -23,6 +23,25 @@ export default function ProductForm() {
   const [fetching, setFetching] = useState(isEdit)
   const [showScanner, setShowScanner] = useState(false)
   const [lookupStatus, setLookupStatus] = useState(null) // null | 'loading' | 'found' | 'not_found'
+  const [dupNameError, setDupNameError] = useState('')
+  const [dupBarcodeError, setDupBarcodeError] = useState('')
+
+  const { products } = useProducts()
+
+  useEffect(() => {
+    const name = form.name.trim()
+    if (!name) { setDupNameError(''); return }
+    const lower = name.toLowerCase()
+    const dup = products.find(p => p.id !== id && (p.displayName || p.name || '').toLowerCase() === lower)
+    setDupNameError(dup ? `"${form.name}" already exists.` : '')
+  }, [form.name, products, id])
+
+  useEffect(() => {
+    const bc = form.barcode.trim()
+    if (!bc) { setDupBarcodeError(''); return }
+    const dup = products.find(p => p.id !== id && p.barcode === bc)
+    setDupBarcodeError(dup ? `Barcode "${bc}" is already used by another product.` : '')
+  }, [form.barcode, products, id])
 
   async function lookupBarcode(code) {
     setLookupStatus('loading')
@@ -89,6 +108,7 @@ export default function ProductForm() {
   async function handleSubmit(e) {
     e.preventDefault()
     if (!form.category) return alert('Category is required')
+    if (dupNameError || dupBarcodeError) return
     setLoading(true)
     try {
       const data = {
@@ -124,7 +144,7 @@ export default function ProductForm() {
   }
 
   return (
-    <div className="p-4 space-y-5">
+    <div className="p-4 space-y-5 pb-6" style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden', scrollbarWidth: 'none' }}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button onClick={() => navigate(-1)} className="text-gray-500 hover:text-gray-700">
@@ -148,8 +168,12 @@ export default function ProductForm() {
             value={form.name}
             onChange={(e) => handleChange('name', e.target.value)}
             placeholder="e.g. Paper Cups"
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2.5 rounded-xl border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            style={{ borderColor: dupNameError ? '#fca5a5' : '#e5e7eb' }}
           />
+          {dupNameError && (
+            <p className="text-xs font-semibold" style={{ color: '#dc2626' }}>⚠ {dupNameError}</p>
+          )}
         </div>
 
         {/* Barcode */}
@@ -182,6 +206,9 @@ export default function ProductForm() {
           )}
           {lookupStatus === 'not_found' && (
             <p className="text-xs text-gray-400">Barcode not found in database. Enter name manually.</p>
+          )}
+          {dupBarcodeError && (
+            <p className="text-xs font-semibold" style={{ color: '#dc2626' }}>⚠ {dupBarcodeError}</p>
           )}
         </div>
 
@@ -272,7 +299,7 @@ export default function ProductForm() {
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || Boolean(dupNameError) || Boolean(dupBarcodeError)}
           className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors disabled:opacity-60"
         >
           {loading ? 'Saving...' : isEdit ? 'Update Product' : 'Save Product'}
