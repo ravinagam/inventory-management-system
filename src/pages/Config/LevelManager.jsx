@@ -36,7 +36,8 @@ export default function LevelManager({ levels }) {
 }
 
 function LevelPane({ levelIndex, levelName }) {
-  const items = useLevelItems(levelIndex)
+  const rawItems = useLevelItems(levelIndex)
+  const items = rawItems.slice().sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }))
 
   const [addName, setAddName] = useState('')
   const [adding, setAdding] = useState(false)
