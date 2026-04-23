@@ -45,8 +45,17 @@ function LevelPane({ levelIndex, levelName }) {
   const [editName, setEditName] = useState('')
   const [error, setError] = useState('')
 
+  function isDuplicate(name, excludeId = null) {
+    const lower = name.trim().toLowerCase()
+    return items.some(item => item.id !== excludeId && item.name.toLowerCase() === lower)
+  }
+
   async function handleAdd() {
     if (!addName.trim()) return
+    if (isDuplicate(addName)) {
+      setError(`"${addName.trim()}" already exists in ${levelName}.`)
+      return
+    }
     setError('')
     setSavingAdd(true)
     try {
@@ -62,6 +71,10 @@ function LevelPane({ levelIndex, levelName }) {
 
   async function handleUpdate(id) {
     if (!editName.trim()) return
+    if (isDuplicate(editName, id)) {
+      setError(`"${editName.trim()}" already exists in ${levelName}.`)
+      return
+    }
     setError('')
     try {
       await updateLevelItem(id, editName.trim())
@@ -101,14 +114,15 @@ function LevelPane({ levelIndex, levelName }) {
             autoFocus
             type="text"
             value={addName}
-            onChange={(e) => setAddName(e.target.value)}
+            onChange={(e) => { setAddName(e.target.value); setError('') }}
             onKeyDown={(e) => {
               if (e.key === 'Enter') handleAdd()
-              if (e.key === 'Escape') { setAdding(false); setAddName('') }
+              if (e.key === 'Escape') { setAdding(false); setAddName(''); setError('') }
             }}
             placeholder={`New ${levelName}…`}
             autoCapitalize="words"
-            className="flex-1 px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 px-3 py-2 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            style={{ borderColor: addName.trim() && isDuplicate(addName) ? '#fca5a5' : '#e5e7eb' }}
           />
           <button
             onClick={handleAdd}
