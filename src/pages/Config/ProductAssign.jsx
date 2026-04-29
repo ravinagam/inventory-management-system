@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { Save, RefreshCw } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { Save, RefreshCw, Search, X, ChevronDown } from 'lucide-react'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '../../lib/firebase'
 import { useLevelItems } from '../../hooks/useHierarchyConfig'
@@ -241,10 +241,46 @@ export default function ProductAssign({ levels, optionalLevels = [] }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function LevelDropdown({ levelIndex, levelName, isOptional, value, onChange }) {
-  const items = useLevelItems(levelIndex)
+  const rawItems = useLevelItems(levelIndex)
+  const items = rawItems.slice().sort((a, b) =>
+    a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' })
+  )
+
+  const selected = items.find(it => it.id === value) || null
+  const [open, setOpen]   = useState(false)
+  const [query, setQuery] = useState('')
+  const ref = useRef(null)
+
+  const filtered = query.trim()
+    ? items.filter(it => it.name.toLowerCase().includes(query.toLowerCase()))
+    : items
+
+  useEffect(() => {
+    function handleClick(e) {
+      if (ref.current && !ref.current.contains(e.target)) {
+        setOpen(false)
+        setQuery('')
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
+
+  function select(item) {
+    onChange(item.id, item.name)
+    setOpen(false)
+    setQuery('')
+  }
+
+  function clear(e) {
+    e.stopPropagation()
+    onChange(null, '')
+    setOpen(false)
+    setQuery('')
+  }
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-1" ref={ref}>
       <div className="flex items-center justify-between">
         <label className="text-sm font-medium text-gray-700">
           {levelName}
@@ -252,19 +288,76 @@ function LevelDropdown({ levelIndex, levelName, isOptional, value, onChange }) {
         </label>
         {isOptional && <span className="text-xs text-gray-400">Optional</span>}
       </div>
-      <select
-        value={value}
-        onChange={(e) => {
-          const selected = items.find((it) => it.id === e.target.value)
-          onChange(e.target.value || null, selected?.name || '')
-        }}
-        className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+
+      {/* Trigger button */}
+      <button
+        type="button"
+        onClick={() => { setOpen(o => !o); setQuery('') }}
+        className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl border text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-left"
+        style={{ borderColor: open ? '#93c5fd' : '#e5e7eb' }}
       >
-        <option value="">— Select {levelName} —</option>
-        {items.map((item) => (
-          <option key={item.id} value={item.id}>{item.name}</option>
-        ))}
-      </select>
+        <span style={{ color: selected ? '#111827' : '#9ca3af' }}>
+          {selected ? selected.name : `— Select ${levelName} —`}
+        </span>
+        <span className="flex items-center gap-1 ml-2 flex-shrink-0">
+          {selected && (
+            <span onMouseDown={clear} className="p-0.5 rounded hover:bg-gray-100">
+              <X size={13} color="#9ca3af" />
+            </span>
+          )}
+          <ChevronDown size={15} color="#9ca3af" style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
+        </span>
+      </button>
+
+      {/* Dropdown */}
+      {open && (
+        <div className="relative z-30">
+          <div className="absolute top-1 left-0 right-0 bg-white rounded-2xl shadow-xl border overflow-hidden" style={{ borderColor: '#e5e7eb' }}>
+            {/* Search input */}
+            <div className="flex items-center gap-2 px-3 py-2 border-b" style={{ borderColor: '#f1f5f9' }}>
+              <Search size={14} color="#9ca3af" />
+              <input
+                autoFocus
+                type="text"
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                placeholder={`Search ${levelName}…`}
+                className="flex-1 text-sm focus:outline-none"
+                style={{ color: '#111827' }}
+              />
+              {query && (
+                <button type="button" onClick={() => setQuery('')}>
+                  <X size={13} color="#9ca3af" />
+                </button>
+              )}
+            </div>
+
+            {/* Options list */}
+            <div style={{ maxHeight: '200px', overflowY: 'auto', scrollbarWidth: 'none' }}>
+              {filtered.length === 0 ? (
+                <p className="text-sm text-center py-4" style={{ color: '#9ca3af' }}>No results.</p>
+              ) : (
+                filtered.map((item, i) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onMouseDown={() => select(item)}
+                    className="w-full text-left px-4 py-2.5 text-sm hover:bg-blue-50 transition-colors"
+                    style={{
+                      borderBottom: i < filtered.length - 1 ? '1px solid #f9fafb' : 'none',
+                      color: item.id === value ? '#1d4ed8' : '#111827',
+                      fontWeight: item.id === value ? 600 : 400,
+                      background: item.id === value ? '#eff6ff' : 'transparent',
+                    }}
+                  >
+                    {item.name}
+                  </button>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
