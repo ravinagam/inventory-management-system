@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { CheckCircle, ClipboardList, History, ChevronDown, ChevronUp } from 'lucide-react'
+import { CheckCircle, ClipboardList, History, ChevronDown, ChevronUp, Search, X } from 'lucide-react'
 import { useProducts } from '../../hooks/useProducts'
 import { useAudit } from '../../hooks/useAudit'
 import { useAuditHistory } from '../../hooks/useAuditHistory'
@@ -112,6 +112,7 @@ export default function DailyAudit() {
   const { auditItems, sessionStatus, updateItem, submitAudit, startNewAudit } = useAudit(products)
   const [submitting, setSubmitting] = useState(false)
   const [tab, setTab] = useState('audit')
+  const [search, setSearch] = useState('')
 
   async function handleSubmit() {
     const incomplete = auditItems.filter((i) => i.actual === '' || i.actual === null || i.actual === undefined)
@@ -134,46 +135,59 @@ export default function DailyAudit() {
     )
   }
 
-  return (
-    <div className="p-4 space-y-4 pb-6" style={{ height: '100%', background: '#f1f5f9', overflowY: 'auto', scrollbarWidth: 'none' }}>
+  const filteredItems = auditItems.filter(item =>
+    !search.trim() ||
+    item.productName.toLowerCase().includes(search.toLowerCase()) ||
+    (item.sku || '').toLowerCase().includes(search.toLowerCase())
+  )
 
-      {/* Tab switcher */}
-      <div className="flex gap-1 p-1 rounded-2xl" style={{ background: '#e2e8f0' }}>
-        <button
-          onClick={() => setTab('audit')}
-          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-bold transition-all"
-          style={tab === 'audit'
-            ? { background: '#fff', color: '#111827', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }
-            : { color: '#9ca3af' }}
-        >
-          <ClipboardList size={15} /> Audit
-        </button>
-        <button
-          onClick={() => setTab('history')}
-          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-bold transition-all"
-          style={tab === 'history'
-            ? { background: '#fff', color: '#111827', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }
-            : { color: '#9ca3af' }}
-        >
-          <History size={15} /> History
-        </button>
+  return (
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#f1f5f9', overflow: 'hidden' }}>
+
+      {/* Fixed: Tab switcher */}
+      <div style={{ flexShrink: 0, padding: '14px 16px 8px' }}>
+        <div className="flex gap-1 p-1 rounded-2xl" style={{ background: '#e2e8f0' }}>
+          <button
+            onClick={() => setTab('audit')}
+            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-bold transition-all"
+            style={tab === 'audit'
+              ? { background: '#fff', color: '#111827', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }
+              : { color: '#9ca3af' }}
+          >
+            <ClipboardList size={15} /> Audit
+          </button>
+          <button
+            onClick={() => setTab('history')}
+            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-bold transition-all"
+            style={tab === 'history'
+              ? { background: '#fff', color: '#111827', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }
+              : { color: '#9ca3af' }}
+          >
+            <History size={15} /> History
+          </button>
+        </div>
       </div>
 
-      {tab === 'history' && <AuditHistory />}
+      {/* History tab — scrollable */}
+      {tab === 'history' && (
+        <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '4px 16px 16px', scrollbarWidth: 'none' }}>
+          <AuditHistory />
+        </div>
+      )}
 
+      {/* Audit tab */}
       {tab === 'audit' && (
         <>
           {products.length < 1 ? (
-            <div className="text-center py-16">
-              <ClipboardList size={44} color="#d1d5db" className="mx-auto mb-3" />
+            <div style={{ flex: 1, overflowY: 'auto', scrollbarWidth: 'none' }} className="flex flex-col items-center justify-center text-center px-4">
+              <ClipboardList size={44} color="#d1d5db" className="mb-3" />
               <p className="text-sm" style={{ color: '#9ca3af' }}>Add products first to start auditing.</p>
             </div>
           ) : sessionStatus === null || sessionStatus === 'completed' ? (
-            <div className="flex flex-col items-center justify-center gap-5 text-center py-16">
+            <div style={{ flex: 1, overflowY: 'auto', scrollbarWidth: 'none' }} className="flex flex-col items-center justify-center gap-5 text-center px-4">
               {sessionStatus === 'completed' ? (
                 <>
-                  <div className="w-20 h-20 rounded-full flex items-center justify-center"
-                    style={{ background: '#f0fdf4' }}>
+                  <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{ background: '#f0fdf4' }}>
                     <CheckCircle size={44} color="#16a34a" />
                   </div>
                   <div>
@@ -183,8 +197,7 @@ export default function DailyAudit() {
                 </>
               ) : (
                 <>
-                  <div className="w-20 h-20 rounded-full flex items-center justify-center"
-                    style={{ background: '#eff6ff' }}>
+                  <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{ background: '#eff6ff' }}>
                     <ClipboardList size={44} color="#1d4ed8" />
                   </div>
                   <div>
@@ -203,86 +216,115 @@ export default function DailyAudit() {
             </div>
           ) : (
             <>
-              <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-xl font-black" style={{ color: '#111827' }}>Current Audit</h1>
-                  <p className="text-xs mt-0.5" style={{ color: '#9ca3af' }}>{auditItems.length} items to count</p>
+              {/* Fixed: header + search */}
+              <div style={{ flexShrink: 0, padding: '4px 16px 8px' }}>
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <h1 className="text-xl font-black" style={{ color: '#111827' }}>Current Audit</h1>
+                    <p className="text-xs mt-0.5" style={{ color: '#9ca3af' }}>{auditItems.length} items to count</p>
+                  </div>
+                  <span className="text-xs font-bold px-2.5 py-1 rounded-full"
+                    style={{ background: '#fffbeb', color: '#d97706', border: '1px solid #fde68a' }}>
+                    In Progress
+                  </span>
                 </div>
-                <span className="text-xs font-bold px-2.5 py-1 rounded-full"
-                  style={{ background: '#fffbeb', color: '#d97706', border: '1px solid #fde68a' }}>
-                  In Progress
-                </span>
+
+                {/* Search bar */}
+                <div className="relative">
+                  <Search size={15} className="absolute left-3.5 top-3.5" style={{ color: '#9ca3af', pointerEvents: 'none' }} />
+                  <input
+                    type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search by product name or code…"
+                    className="w-full pl-10 pr-9 py-3 rounded-2xl border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    style={{ background: '#fff', borderColor: '#e5e7eb' }}
+                  />
+                  {search && (
+                    <button type="button" onClick={() => setSearch('')} className="absolute right-3 top-3">
+                      <X size={15} color="#9ca3af" />
+                    </button>
+                  )}
+                </div>
               </div>
 
-              <div className="space-y-3">
-                {auditItems.map((item, index) => {
-                  const diff = item.actual !== '' ? Number(item.actual) - item.expected : null
-                  const diffColor = diff === null ? null : diff < 0 ? '#dc2626' : diff > 0 ? '#1d4ed8' : '#16a34a'
-                  return (
-                    <div key={item.productId} className="bg-white rounded-2xl shadow-sm p-4 space-y-3">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0"
-                          style={{ background: '#eff6ff', color: '#1d4ed8' }}>
-                          {index + 1}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-sm font-bold truncate" style={{ color: '#111827' }}>{item.productName}</h3>
-                          {item.sku && (
-                            <span className="text-xs font-mono px-1.5 py-0.5 rounded"
-                              style={{ background: '#eff6ff', color: '#1d4ed8' }}>{item.sku}</span>
+              {/* Scrollable: audit items */}
+              <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '4px 16px 8px', scrollbarWidth: 'none' }} className="space-y-3">
+                {filteredItems.length === 0 ? (
+                  <p className="text-center text-sm py-10" style={{ color: '#9ca3af' }}>No products match your search.</p>
+                ) : (
+                  filteredItems.map((item, index) => {
+                    const diff = item.actual !== '' ? Number(item.actual) - item.expected : null
+                    const diffColor = diff === null ? null : diff < 0 ? '#dc2626' : diff > 0 ? '#1d4ed8' : '#16a34a'
+                    return (
+                      <div key={item.productId} className="bg-white rounded-2xl shadow-sm p-4 space-y-3">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0"
+                            style={{ background: '#eff6ff', color: '#1d4ed8' }}>
+                            {index + 1}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-sm font-bold truncate" style={{ color: '#111827' }}>{item.productName}</h3>
+                            {item.sku && (
+                              <span className="text-xs font-mono px-1.5 py-0.5 rounded"
+                                style={{ background: '#eff6ff', color: '#1d4ed8' }}>{item.sku}</span>
+                            )}
+                          </div>
+                          {diff !== null && (
+                            <span className="text-sm font-black" style={{ color: diffColor }}>
+                              {diff === 0 ? '✓' : diff > 0 ? `+${diff}` : diff}
+                            </span>
                           )}
                         </div>
-                        {diff !== null && (
-                          <span className="text-sm font-black" style={{ color: diffColor }}>
-                            {diff === 0 ? '✓' : diff > 0 ? `+${diff}` : diff}
-                          </span>
-                        )}
-                      </div>
 
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="rounded-xl px-3 py-2.5 text-center" style={{ background: '#f8fafc' }}>
-                          <p className="text-xs font-medium" style={{ color: '#9ca3af' }}>Expected</p>
-                          <p className="text-lg font-black mt-0.5" style={{ color: '#374151' }}>{item.expected}</p>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="rounded-xl px-3 py-2.5 text-center" style={{ background: '#f8fafc' }}>
+                            <p className="text-xs font-medium" style={{ color: '#9ca3af' }}>Expected</p>
+                            <p className="text-lg font-black mt-0.5" style={{ color: '#374151' }}>{item.expected}</p>
+                          </div>
+                          <div className="rounded-xl px-3 py-2.5" style={{ background: '#f8fafc' }}>
+                            <p className="text-xs font-medium mb-1" style={{ color: '#9ca3af' }}>Actual Count</p>
+                            <input
+                              type="number"
+                              min="0"
+                              value={item.actual}
+                              onChange={(e) => updateItem(item.productId, 'actual', e.target.value)}
+                              placeholder="Enter count"
+                              className="w-full text-center text-lg font-black bg-transparent border-b-2 focus:outline-none"
+                              style={{ borderColor: diff !== null ? diffColor || '#e5e7eb' : '#e5e7eb', color: diffColor || '#111827' }}
+                            />
+                          </div>
                         </div>
-                        <div className="rounded-xl px-3 py-2.5" style={{ background: '#f8fafc' }}>
-                          <p className="text-xs font-medium mb-1" style={{ color: '#9ca3af' }}>Actual Count</p>
-                          <input
-                            type="number"
-                            min="0"
-                            value={item.actual}
-                            onChange={(e) => updateItem(item.productId, 'actual', e.target.value)}
-                            placeholder="Enter count"
-                            className="w-full text-center text-lg font-black bg-transparent border-b-2 focus:outline-none"
-                            style={{ borderColor: diff !== null ? diffColor || '#e5e7eb' : '#e5e7eb', color: diffColor || '#111827' }}
-                          />
-                        </div>
-                      </div>
 
-                      <div>
-                        <label className="text-xs font-medium" style={{ color: '#9ca3af' }}>Reason for discrepancy</label>
-                        <select
-                          value={item.reason}
-                          onChange={(e) => updateItem(item.productId, 'reason', e.target.value)}
-                          className="mt-1 w-full px-3 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          style={{ background: '#f9fafb', borderColor: '#e5e7eb', color: '#374151' }}
-                        >
-                          <option value="">Select reason (optional)…</option>
-                          {REASONS.map((r) => <option key={r} value={r}>{r}</option>)}
-                        </select>
+                        <div>
+                          <label className="text-xs font-medium" style={{ color: '#9ca3af' }}>Reason for discrepancy</label>
+                          <select
+                            value={item.reason}
+                            onChange={(e) => updateItem(item.productId, 'reason', e.target.value)}
+                            className="mt-1 w-full px-3 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            style={{ background: '#f9fafb', borderColor: '#e5e7eb', color: '#374151' }}
+                          >
+                            <option value="">Select reason (optional)…</option>
+                            {REASONS.map((r) => <option key={r} value={r}>{r}</option>)}
+                          </select>
+                        </div>
                       </div>
-                    </div>
-                  )
-                })}
+                    )
+                  })
+                )}
               </div>
 
-              <button
-                onClick={handleSubmit}
-                disabled={submitting}
-                className="w-full py-4 rounded-2xl text-white font-black text-sm disabled:opacity-60"
-                style={{ background: 'linear-gradient(135deg, #1d4ed8, #2563eb)', boxShadow: '0 4px 14px rgba(29,78,216,0.3)' }}
-              >
-                {submitting ? 'Submitting…' : 'Submit Audit'}
-              </button>
+              {/* Fixed: Submit button */}
+              <div style={{ flexShrink: 0, padding: '8px 16px 12px' }}>
+                <button
+                  onClick={handleSubmit}
+                  disabled={submitting}
+                  className="w-full py-4 rounded-2xl text-white font-black text-sm disabled:opacity-60"
+                  style={{ background: 'linear-gradient(135deg, #1d4ed8, #2563eb)', boxShadow: '0 4px 14px rgba(29,78,216,0.3)' }}
+                >
+                  {submitting ? 'Submitting…' : 'Submit Audit'}
+                </button>
+              </div>
             </>
           )}
         </>
