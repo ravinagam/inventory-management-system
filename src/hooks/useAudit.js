@@ -4,11 +4,6 @@ import {
 } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 
-function pickRandom(products, count = 5) {
-  const shuffled = [...products].sort(() => Math.random() - 0.5)
-  return shuffled.slice(0, count)
-}
-
 export function useAudit(products) {
   const [auditItems, setAuditItems] = useState([])
   const [sessionId, setSessionId] = useState(null)
@@ -16,7 +11,9 @@ export function useAudit(products) {
 
   function startNewAudit() {
     if (!products || products.length === 0) return
-    const picked = pickRandom(products).map((p) => ({
+    const picked = [...products]
+      .sort((a, b) => (a.displayName || a.name || '').localeCompare(b.displayName || b.name || ''))
+      .map((p) => ({
       productId: p.id,
       productName: p.displayName || p.name,
       sku: p.sku || '',
