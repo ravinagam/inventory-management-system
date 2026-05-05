@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
   collection, onSnapshot, addDoc, updateDoc, deleteDoc,
-  doc, serverTimestamp, query, orderBy,
+  doc, serverTimestamp,
 } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 
@@ -12,9 +12,16 @@ export function useProducts() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const q = query(collection(db, COL), orderBy('createdAt', 'desc'))
-    const unsub = onSnapshot(q, (snap) => {
-      setProducts(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
+    // No orderBy — Firestore silently excludes docs missing the ordered field.
+    // Sort client-side to guarantee all products are always returned.
+    const unsub = onSnapshot(collection(db, COL), (snap) => {
+      const all = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
+      all.sort((a, b) => {
+        const ta = a.createdAt?.toMillis?.() ?? 0
+        const tb = b.createdAt?.toMillis?.() ?? 0
+        return tb - ta
+      })
+      setProducts(all)
       setLoading(false)
     })
     return unsub
