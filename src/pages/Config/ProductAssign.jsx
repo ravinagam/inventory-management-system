@@ -38,6 +38,7 @@ export default function ProductAssign({ levels, optionalLevels = [] }) {
   const [error, setError]                 = useState('')
   const [dupNameError, setDupNameError]   = useState('')
   const [dupSkuError,  setDupSkuError]    = useState('')
+  const [dupProduct,   setDupProduct]     = useState(null)
 
   const { products } = useProducts()
 
@@ -56,10 +57,16 @@ export default function ProductAssign({ levels, optionalLevels = [] }) {
 
   // Duplicate checks — must come after `sku` is declared
   useEffect(() => {
-    if (!productName.trim()) { setDupNameError(''); return }
+    if (!productName.trim()) { setDupNameError(''); setDupProduct(null); return }
     const lower = productName.trim().toLowerCase()
     const dup = products.find(p => (p.displayName || p.name || '').toLowerCase() === lower)
-    setDupNameError(dup ? `"${productName.trim()}" already exists.` : '')
+    if (dup) {
+      setDupNameError(`"${productName.trim()}" already exists.`)
+      setDupProduct(dup)
+    } else {
+      setDupNameError('')
+      setDupProduct(null)
+    }
   }, [productName, products])
 
   useEffect(() => {
@@ -85,6 +92,9 @@ export default function ProductAssign({ levels, optionalLevels = [] }) {
     setSkuEdited(false)
     setCurrentStock('0')
     setMinStock('0')
+    setDupProduct(null)
+    setDupNameError('')
+    setDupSkuError('')
   }
 
   async function handleSave(e) {
@@ -214,17 +224,41 @@ export default function ProductAssign({ levels, optionalLevels = [] }) {
         </div>
       </div>
 
-      {/* Live preview */}
+      {/* Live preview / duplicate info */}
       {productName && (
-        <div className={`rounded-2xl p-4 space-y-2 ${dupNameError || dupSkuError ? 'bg-red-50 border border-red-200' : 'bg-blue-50'}`}>
-          <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: dupNameError || dupSkuError ? '#dc2626' : '#1d4ed8' }}>
-            {dupNameError || dupSkuError ? 'Duplicate detected' : 'Preview'}
-          </p>
-          <p className="text-sm font-semibold text-gray-800">{productName}</p>
-          <span className="text-xs font-mono px-2 py-0.5 rounded" style={{ background: '#dbeafe', color: '#1d4ed8' }}>{sku}</span>
-          {dupNameError && <p className="text-xs font-semibold" style={{ color: '#dc2626' }}>⚠ {dupNameError}</p>}
-          {dupSkuError  && <p className="text-xs font-semibold" style={{ color: '#dc2626' }}>⚠ {dupSkuError}</p>}
-        </div>
+        dupProduct ? (
+          <div className="rounded-2xl p-4 space-y-2 bg-amber-50 border border-amber-200">
+            <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: '#b45309' }}>
+              Product Already Exists
+            </p>
+            <p className="text-sm font-semibold text-gray-800">{dupProduct.displayName || dupProduct.name}</p>
+            {dupProduct.sku && (
+              <span className="text-xs font-mono px-2 py-0.5 rounded" style={{ background: '#fef3c7', color: '#92400e' }}>{dupProduct.sku}</span>
+            )}
+            <div className="flex items-center gap-3 mt-1">
+              <div className="text-xs" style={{ color: '#78350f' }}>
+                Current stock: <span className="font-bold">{dupProduct.currentStock ?? 0}</span>
+              </div>
+              {dupProduct.minStock !== undefined && (
+                <div className="text-xs" style={{ color: '#78350f' }}>
+                  Min stock: <span className="font-bold">{dupProduct.minStock}</span>
+                </div>
+              )}
+            </div>
+            <p className="text-xs mt-1" style={{ color: '#92400e' }}>
+              To adjust stock for this product, use <span className="font-bold">Update Inventory</span> instead.
+            </p>
+          </div>
+        ) : (
+          <div className={`rounded-2xl p-4 space-y-2 ${dupSkuError ? 'bg-red-50 border border-red-200' : 'bg-blue-50'}`}>
+            <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: dupSkuError ? '#dc2626' : '#1d4ed8' }}>
+              {dupSkuError ? 'Duplicate code detected' : 'Preview'}
+            </p>
+            <p className="text-sm font-semibold text-gray-800">{productName}</p>
+            <span className="text-xs font-mono px-2 py-0.5 rounded" style={{ background: '#dbeafe', color: '#1d4ed8' }}>{sku}</span>
+            {dupSkuError && <p className="text-xs font-semibold" style={{ color: '#dc2626' }}>⚠ {dupSkuError}</p>}
+          </div>
+        )
       )}
 
       {error && <p className="text-xs text-red-500 px-1">{error}</p>}
