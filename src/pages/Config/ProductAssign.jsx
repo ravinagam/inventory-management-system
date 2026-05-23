@@ -55,8 +55,11 @@ export default function ProductAssign({ levels, optionalLevels = [] }) {
 
   const sku = skuEdited ? customSKU : autoSKU
 
-  // Duplicate checks — must come after `sku` is declared
+  // Duplicate checks — must come after `sku` is declared.
+  // Skip during save: onSnapshot fires immediately after addDoc, causing a
+  // false-positive flash where the just-saved product is seen as a duplicate.
   useEffect(() => {
+    if (saving) return
     if (!productName.trim()) { setDupNameError(''); setDupProduct(null); return }
     const lower = productName.trim().toLowerCase()
     const dup = products.find(p => (p.displayName || p.name || '').toLowerCase() === lower)
@@ -67,14 +70,15 @@ export default function ProductAssign({ levels, optionalLevels = [] }) {
       setDupNameError('')
       setDupProduct(null)
     }
-  }, [productName, products])
+  }, [productName, products, saving])
 
   useEffect(() => {
+    if (saving) return
     if (!sku.trim()) { setDupSkuError(''); return }
     const lower = sku.trim().toLowerCase()
     const dup = products.find(p => (p.sku || '').toLowerCase() === lower)
     setDupSkuError(dup ? `Product code "${sku.trim()}" is already in use.` : '')
-  }, [sku, products])
+  }, [sku, products, saving])
 
   function handleSelect(levelIndex, itemId, itemName) {
     setSelections((prev) => {
