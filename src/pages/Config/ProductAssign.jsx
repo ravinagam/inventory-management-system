@@ -33,6 +33,8 @@ export default function ProductAssign({ levels, optionalLevels = [] }) {
   const [skuEdited, setSkuEdited]         = useState(false)
   const [currentStock, setCurrentStock]   = useState('0')
   const [minStock, setMinStock]           = useState('0')
+  const [actualPrice, setActualPrice]     = useState('')
+  const [sellingPrice, setSellingPrice]   = useState('')
   const [saving, setSaving]               = useState(false)
   const [saved, setSaved]                 = useState(false)
   const [error, setError]                 = useState('')
@@ -96,6 +98,8 @@ export default function ProductAssign({ levels, optionalLevels = [] }) {
     setSkuEdited(false)
     setCurrentStock('0')
     setMinStock('0')
+    setActualPrice('')
+    setSellingPrice('')
     setDupProduct(null)
     setDupNameError('')
     setDupSkuError('')
@@ -126,6 +130,8 @@ export default function ProductAssign({ levels, optionalLevels = [] }) {
         sku: sku.trim(),
         currentStock: Number(currentStock) || 0,
         minStock: Number(minStock) || 0,
+        actualPrice: actualPrice !== '' ? Number(actualPrice) : null,
+        sellingPrice: sellingPrice !== '' ? Number(sellingPrice) : null,
         source: 'config',
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
@@ -223,6 +229,24 @@ export default function ProductAssign({ levels, optionalLevels = [] }) {
             <label className="text-xs font-medium text-gray-600">Min Stock</label>
             <input type="number" min={0} value={minStock}
               onChange={(e) => setMinStock(e.target.value)}
+              className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+        </div>
+
+        {/* Price fields */}
+        <div className="flex gap-3 pt-2 border-t border-gray-100">
+          <div className="flex-1 space-y-1">
+            <label className="text-xs font-medium text-gray-600">Actual Price (₹)</label>
+            <input type="number" min={0} step="0.01" value={actualPrice}
+              onChange={(e) => setActualPrice(e.target.value)}
+              placeholder="0.00"
+              className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <div className="flex-1 space-y-1">
+            <label className="text-xs font-medium text-gray-600">Selling Price (₹)</label>
+            <input type="number" min={0} step="0.01" value={sellingPrice}
+              onChange={(e) => setSellingPrice(e.target.value)}
+              placeholder="0.00"
               className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
           </div>
         </div>

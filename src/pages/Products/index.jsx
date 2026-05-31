@@ -163,7 +163,7 @@ export default function ProductList() {
                     </div>
                     <StockBar current={p.currentStock ?? 0} min={p.minStock ?? 0} />
                   </div>
-                  <div className="text-right flex-shrink-0 ml-1">
+                  <div className="text-right flex-shrink-0 ml-1 space-y-0.5">
                     <p className="text-base font-black leading-tight"
                       style={{ color: isLow ? '#dc2626' : '#16a34a' }}>
                       {p.currentStock ?? 0}
@@ -171,6 +171,16 @@ export default function ProductList() {
                     {isLow
                       ? <p className="text-xs font-bold" style={{ color: '#dc2626' }}>Low</p>
                       : <p className="text-xs" style={{ color: '#9ca3af' }}>units</p>}
+                    {p.sellingPrice != null && (
+                      <p className="text-xs font-bold" style={{ color: '#1d4ed8' }}>
+                        ₹{p.sellingPrice}
+                      </p>
+                    )}
+                    {p.actualPrice != null && p.actualPrice !== p.sellingPrice && (
+                      <p className="text-xs line-through" style={{ color: '#9ca3af' }}>
+                        ₹{p.actualPrice}
+                      </p>
+                    )}
                   </div>
                 </div>
               )
