@@ -190,7 +190,8 @@ export default function Dashboard() {
                 : isOut
                 ? { background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca' }
                 : { background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe' }
-              const badgeText = isIn ? `+${log.quantity}` : isOut ? `-${log.quantity}` : `~${log.quantity}`
+              const transactionText = isIn ? `+${log.quantity}` : isOut ? `-${log.quantity}` : `~${log.quantity}`
+              const badgeText = `${transactionText} → ${log.newStock ?? 0}`
 
               return (
                 <div key={log.id}
