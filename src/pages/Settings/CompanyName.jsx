@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { ArrowLeft, Save } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import useAuthStore from '../../store/authStore'
 import { useSettings, saveSettings } from '../../hooks/useSettings'
 
 export default function CompanyNamePage() {
   const navigate = useNavigate()
+  const companyId = useAuthStore((s) => s.companyId)
   const { settings, loading } = useSettings()
   const [companyName, setCompanyName] = useState('')
   const [saving, setSaving] = useState(false)
@@ -24,7 +26,7 @@ export default function CompanyNamePage() {
     setError('')
     setSaving(true)
     try {
-      await saveSettings({ companyName: companyName.trim() })
+      await saveSettings(companyId, { companyName: companyName.trim() })
       setSaved(true)
       setTimeout(() => navigate('/settings'), 1000)
     } catch {

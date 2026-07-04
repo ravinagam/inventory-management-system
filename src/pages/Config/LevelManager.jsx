@@ -3,8 +3,10 @@ import { Plus, Pencil, Trash2, Check, X } from 'lucide-react'
 import {
   useLevelItems, addLevelItem, updateLevelItem, deleteLevelItem,
 } from '../../hooks/useHierarchyConfig'
+import useAuthStore from '../../store/authStore'
 
 export default function LevelManager({ levels }) {
+  const companyId = useAuthStore((s) => s.companyId)
   const [activeLevel, setActiveLevel] = useState(0)
 
   return (
@@ -28,6 +30,7 @@ export default function LevelManager({ levels }) {
 
       <LevelPane
         key={activeLevel}
+        companyId={companyId}
         levelIndex={activeLevel}
         levelName={levels[activeLevel]}
       />
@@ -35,7 +38,7 @@ export default function LevelManager({ levels }) {
   )
 }
 
-function LevelPane({ levelIndex, levelName }) {
+function LevelPane({ companyId, levelIndex, levelName }) {
   const rawItems = useLevelItems(levelIndex)
   const items = rawItems.slice().sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }))
 
@@ -60,7 +63,7 @@ function LevelPane({ levelIndex, levelName }) {
     setError('')
     setSavingAdd(true)
     try {
-      await addLevelItem(levelIndex, addName.trim(), null)
+      await addLevelItem(companyId, levelIndex, addName.trim(), null)
       setAddName('')
       setAdding(false)
     } catch {
@@ -78,7 +81,7 @@ function LevelPane({ levelIndex, levelName }) {
     }
     setError('')
     try {
-      await updateLevelItem(id, editName.trim())
+      await updateLevelItem(companyId, id, editName.trim())
       setEditId(null)
     } catch {
       setError('Failed to update.')
@@ -89,7 +92,7 @@ function LevelPane({ levelIndex, levelName }) {
     if (!window.confirm('Delete this item?')) return
     setError('')
     try {
-      await deleteLevelItem(id)
+      await deleteLevelItem(companyId, id)
     } catch {
       setError('Failed to delete.')
     }

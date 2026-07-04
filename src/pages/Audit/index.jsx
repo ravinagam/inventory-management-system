@@ -3,6 +3,7 @@ import { CheckCircle, ClipboardList, History, ChevronDown, ChevronUp, Search, X 
 import { useProducts } from '../../hooks/useProducts'
 import { useAudit } from '../../hooks/useAudit'
 import { useAuditHistory } from '../../hooks/useAuditHistory'
+import useAuthStore from '../../store/authStore'
 
 const REASONS = ['Damage', 'Theft', 'Recount', 'Supplier Error', 'Other']
 
@@ -108,8 +109,9 @@ function AuditHistory() {
 }
 
 export default function DailyAudit() {
+  const companyId = useAuthStore((s) => s.companyId)
   const { products, loading: productsLoading } = useProducts()
-  const { auditItems, sessionStatus, updateItem, submitAudit, startNewAudit } = useAudit(products)
+  const { auditItems, sessionStatus, updateItem, submitAudit, startNewAudit } = useAudit(companyId, products)
   const [submitting, setSubmitting] = useState(false)
   const [tab, setTab] = useState('audit')
   const [search, setSearch] = useState('')

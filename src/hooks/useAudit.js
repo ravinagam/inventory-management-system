@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import {
-  collection, addDoc, updateDoc, serverTimestamp, doc,
+  addDoc, updateDoc, serverTimestamp,
 } from 'firebase/firestore'
-import { db } from '../lib/firebase'
+import { companyCol, companyDoc } from '../lib/tenant'
 
-export function useAudit(products) {
+export function useAudit(companyId, products) {
   const [auditItems, setAuditItems] = useState([])
   const [sessionId, setSessionId] = useState(null)
   const [sessionStatus, setSessionStatus] = useState(null)
@@ -21,7 +21,7 @@ export function useAudit(products) {
       actual: String(p.currentStock ?? 0),
       reason: '',
     }))
-    addDoc(collection(db, 'auditSessions'), {
+    addDoc(companyCol(companyId, 'auditSessions'), {
       items: picked,
       status: 'pending',
       createdAt: serverTimestamp(),
@@ -40,7 +40,7 @@ export function useAudit(products) {
     // Adjust stock directly — no runTransaction (conflicts with persistentLocalCache)
     for (const item of auditItems) {
       if (item.actual !== '' && Number(item.actual) !== item.expected) {
-        await updateDoc(doc(db, 'products', item.productId), {
+        await updateDoc(companyDoc(companyId, 'products', item.productId), {
           currentStock: Number(item.actual),
           updatedAt: serverTimestamp(),
         })
@@ -48,7 +48,7 @@ export function useAudit(products) {
     }
 
     if (sessionId) {
-      await updateDoc(doc(db, 'auditSessions', sessionId), {
+      await updateDoc(companyDoc(companyId, 'auditSessions', sessionId), {
         items: auditItems,
         status: 'completed',
         completedAt: serverTimestamp(),

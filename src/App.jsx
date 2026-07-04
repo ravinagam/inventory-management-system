@@ -19,13 +19,50 @@ import EditProduct from './pages/Config/EditProduct'
 
 export default function App() {
   const setUser = useAuthStore((s) => s.setUser)
+  const setCompanyId = useAuthStore((s) => s.setCompanyId)
+  const setRole = useAuthStore((s) => s.setRole)
+  const setLoading = useAuthStore((s) => s.setLoading)
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (user) => {
-      setUser(user)
+    const unsub = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          // Get ID token result to extract custom claims (companyId, role)
+          // Force refresh (true) to get latest custom claims from Firebase
+          const idTokenResult = await user.getIdTokenResult(true)
+          let companyId = idTokenResult.claims.companyId || null
+          let role = idTokenResult.claims.role || null
+
+          console.log('🔍 DEBUG: companyId from token:', companyId, 'role:', role)
+
+          // Retry mechanism: if no claims found, wait and try again
+          // (Firebase takes ~1 second to propagate custom claims after they're set)
+          if (!companyId) {
+            console.log('⚠️ No companyId in token, retrying in 2 seconds...')
+            await new Promise(resolve => setTimeout(resolve, 2000))
+
+            const retryTokenResult = await user.getIdTokenResult(true)
+            companyId = retryTokenResult.claims.companyId || null
+            role = retryTokenResult.claims.role || null
+            console.log('🔄 Retry result: companyId:', companyId, 'role:', role)
+          }
+
+          setUser(user, companyId, role)
+          setCompanyId(companyId)
+          setRole(role)
+        } catch (error) {
+          console.error('Error getting ID token result:', error)
+          setUser(user, null, null)
+        }
+      } else {
+        setUser(null, null, null)
+        setCompanyId(null)
+        setRole(null)
+      }
+      setLoading(false)
     })
     return unsub
-  }, [setUser])
+  }, [setUser, setCompanyId, setRole, setLoading])
 
   return (
     <BrowserRouter>

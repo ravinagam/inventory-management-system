@@ -1,23 +1,35 @@
 import { useEffect, useState } from 'react'
-import { doc, onSnapshot, setDoc, serverTimestamp } from 'firebase/firestore'
-import { db } from '../lib/firebase'
-
-const SETTINGS_REF = doc(db, 'settings', 'general')
+import { onSnapshot, setDoc, serverTimestamp } from 'firebase/firestore'
+import { companyDoc } from '../lib/tenant'
+import useAuthStore from '../store/authStore'
 
 export function useSettings() {
+  const companyId = useAuthStore((s) => s.companyId)
   const [settings, setSettings] = useState({ companyName: '' })
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    return onSnapshot(SETTINGS_REF, (snap) => {
-      if (snap.exists()) setSettings(snap.data())
+    if (!companyId) {
+      setSettings({ companyName: '' })
+      setLoading(false)
+      return
+    }
+
+    const settingsRef = companyDoc(companyId, 'settings', 'general')
+    return onSnapshot(settingsRef, (snap) => {
+      if (snap.exists()) {
+        setSettings(snap.data())
+      } else {
+        setSettings({ companyName: '' })
+      }
       setLoading(false)
     })
-  }, [])
+  }, [companyId])
 
   return { settings, loading }
 }
 
-export async function saveSettings(data) {
-  await setDoc(SETTINGS_REF, { ...data, updatedAt: serverTimestamp() }, { merge: true })
+export async function saveSettings(companyId, data) {
+  const settingsRef = companyDoc(companyId, 'settings', 'general')
+  await setDoc(settingsRef, { ...data, updatedAt: serverTimestamp() }, { merge: true })
 }

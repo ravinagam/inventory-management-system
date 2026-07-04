@@ -3,6 +3,7 @@ import { ArrowLeft, Search, X, TrendingUp, TrendingDown, Sliders } from 'lucide-
 import { useNavigate } from 'react-router-dom'
 import { useProducts } from '../../hooks/useProducts'
 import { submitInventoryUpdate } from '../../hooks/useInventory'
+import useAuthStore from '../../store/authStore'
 
 const ACTIONS = [
   { key: 'Stock In',  label: 'Stock In',  icon: TrendingUp,  active: { bg: '#f0fdf4', color: '#16a34a', border: '#bbf7d0' }, btn: '#16a34a' },
@@ -114,6 +115,7 @@ function ProductSearch({ products, selectedId, onSelect }) {
 
 export default function InventoryUpdate() {
   const navigate = useNavigate()
+  const companyId = useAuthStore((s) => s.companyId)
   const { products } = useProducts()
   const [form, setForm] = useState({ productId: '', action: 'Stock In', quantity: '', notes: '' })
   const [loading, setLoading] = useState(false)
@@ -142,6 +144,7 @@ export default function InventoryUpdate() {
     try {
       const product = products.find((p) => p.id === form.productId)
       await submitInventoryUpdate({
+        companyId,
         productId: form.productId,
         productName: product?.displayName || product?.name || '',
         action: form.action,

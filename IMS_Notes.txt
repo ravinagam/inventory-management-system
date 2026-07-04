@@ -21,4 +21,17 @@ Inventory management system - User friendly UI on web and app without any ambigu
 	  name = Product + Size
 5. generate sku
 6. make sure all hiearchy levels are present while adding product
-7.
+7
+
+create one configuration page.
+user should be able to enter number of levels in product hierarchy.
+Once submit is done, sysetm should ask for level names.
+Once levels are added, user should be able to enter those levels data seperately. 
+for example, user entered 5 and level names as Main Category, sub category, Variant, size and product.
+user should be able to enter, edit, delete Main category data.
+user should be able to enter, edit, delete sub category data, etc
+
+user should be able to assign all levels to product.
+
+no need to touch dashboard, Inventory, audit, reports, product sections.
+give me the plan sample UI how it look like.  will review and confirm

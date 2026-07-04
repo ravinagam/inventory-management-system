@@ -3,14 +3,16 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, ScanLine, X, Trash2 } from 'lucide-react'
 import { useCategories, addCategory } from '../../hooks/useCategories'
 import { addProduct, updateProduct, deleteProduct, useProducts } from '../../hooks/useProducts'
-import { doc, getDoc } from 'firebase/firestore'
-import { db } from '../../lib/firebase'
+import { getDoc } from 'firebase/firestore'
+import { companyDoc } from '../../lib/tenant'
+import useAuthStore from '../../store/authStore'
 import BarcodeScanner from '../../components/BarcodeScanner'
 
 const TAG_SUGGESTIONS = ['Fast Moving', 'Summer', 'Seasonal', 'Fragile', 'Imported']
 
 export default function ProductForm() {
   const navigate = useNavigate()
+  const companyId = useAuthStore((s) => s.companyId)
   const { id } = useParams()
   const isEdit = Boolean(id)
   const { categories } = useCategories()
@@ -69,8 +71,8 @@ export default function ProductForm() {
 
   // Load existing product when editing
   useEffect(() => {
-    if (!isEdit) return
-    getDoc(doc(db, 'products', id)).then((snap) => {
+    if (!isEdit || !companyId) return
+    getDoc(companyDoc(companyId, 'products', id)).then((snap) => {
       if (snap.exists()) {
         const d = snap.data()
         setForm({
@@ -84,7 +86,7 @@ export default function ProductForm() {
       }
       setFetching(false)
     })
-  }, [id, isEdit])
+  }, [id, isEdit, companyId])
 
   function handleChange(field, value) {
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -100,13 +102,14 @@ export default function ProductForm() {
   async function handleAddCategory() {
     const trimmed = newCategory.trim()
     if (!trimmed) return
-    await addCategory(trimmed)
+    await addCategory(companyId, trimmed)
     setForm((prev) => ({ ...prev, category: trimmed }))
     setNewCategory('')
   }
 
   async function handleSubmit(e) {
     e.preventDefault()
+    console.log('🔍 handleSubmit called, companyId:', companyId)
     if (!form.category) return alert('Category is required')
     if (dupNameError || dupBarcodeError) return
     setLoading(true)
@@ -116,13 +119,18 @@ export default function ProductForm() {
         currentStock: Number(form.currentStock) || 0,
         minStock: Number(form.minStock) || 0,
       }
+      console.log('🔍 About to save, isEdit:', isEdit)
       if (isEdit) {
-        await updateProduct(id, data)
+        console.log('🔍 Updating product')
+        await updateProduct(companyId, id, data)
       } else {
-        await addProduct(data)
+        console.log('🔍 Adding new product with companyId:', companyId)
+        await addProduct(companyId, data)
       }
+      console.log('✅ Product saved, navigating...')
       navigate('/products')
     } catch (err) {
+      console.error('❌ Error:', err)
       alert('Failed to save product. Please try again.')
     } finally {
       setLoading(false)
@@ -131,7 +139,7 @@ export default function ProductForm() {
 
   async function handleDelete() {
     if (!confirm('Delete this product?')) return
-    await deleteProduct(id)
+    await deleteProduct(companyId, id)
     navigate('/products')
   }
 

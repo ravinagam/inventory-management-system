@@ -1,31 +1,37 @@
 import { useEffect, useState } from 'react'
 import {
-  collection, onSnapshot, addDoc, query, orderBy,
-  serverTimestamp, doc, limit, getDoc, updateDoc,
+  onSnapshot, addDoc, query, orderBy,
+  serverTimestamp, limit, getDoc, updateDoc,
 } from 'firebase/firestore'
-import { db } from '../lib/firebase'
-
-const LOGS_COL = 'inventoryLogs'
+import { companyCol, companyDoc } from '../lib/tenant'
+import useAuthStore from '../store/authStore'
 
 export function useInventoryLogs(limitCount = 20) {
+  const companyId = useAuthStore((s) => s.companyId)
   const [logs, setLogs] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const q = query(collection(db, LOGS_COL), orderBy('createdAt', 'desc'), limit(limitCount))
+    if (!companyId) {
+      setLogs([])
+      setLoading(false)
+      return
+    }
+
+    const q = query(companyCol(companyId, 'inventoryLogs'), orderBy('createdAt', 'desc'), limit(limitCount))
     const unsub = onSnapshot(q, (snap) => {
       setLogs(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
       setLoading(false)
     })
     return unsub
-  }, [limitCount])
+  }, [companyId, limitCount])
 
   return { logs, loading }
 }
 
-export async function submitInventoryUpdate({ productId, productName, action, quantity, notes }) {
+export async function submitInventoryUpdate({ companyId, productId, productName, action, quantity, notes }) {
   const qty = Number(quantity)
-  const productRef = doc(db, 'products', productId)
+  const productRef = companyDoc(companyId, 'products', productId)
 
   // Fetch current stock from server
   const snap = await getDoc(productRef)
@@ -41,7 +47,7 @@ export async function submitInventoryUpdate({ productId, productName, action, qu
   await updateDoc(productRef, { currentStock: newStock, updatedAt: serverTimestamp() })
 
   // Log the entry
-  await addDoc(collection(db, LOGS_COL), {
+  await addDoc(companyCol(companyId, 'inventoryLogs'), {
     productId,
     productName,
     action,

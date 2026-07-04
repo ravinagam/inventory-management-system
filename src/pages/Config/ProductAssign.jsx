@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { Save, RefreshCw, Search, X, ChevronDown } from 'lucide-react'
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
-import { db } from '../../lib/firebase'
+import { addDoc, serverTimestamp } from 'firebase/firestore'
+import { companyCol } from '../../lib/tenant'
+import useAuthStore from '../../store/authStore'
 import { useLevelItems } from '../../hooks/useHierarchyConfig'
 import { useProducts } from '../../hooks/useProducts'
 
@@ -26,6 +27,7 @@ function autoProductName(selections) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function ProductAssign({ levels, optionalLevels = [] }) {
+  const companyId = useAuthStore((s) => s.companyId)
   const [selections, setSelections]       = useState(() => Array(levels.length).fill(null))
   const [productName, setProductName]     = useState('')
   const [userEditedName, setUserEditedName] = useState(false)
@@ -124,7 +126,7 @@ export default function ProductAssign({ levels, optionalLevels = [] }) {
         .map((s, i) => s ? ({ levelIndex: i, levelName: levels[i], itemId: s.id, itemName: s.name }) : null)
         .filter(Boolean)
 
-      await addDoc(collection(db, 'products'), {
+      await addDoc(companyCol(companyId, 'products'), {
         hierarchyLevels,
         displayName: productName.trim(),
         sku: sku.trim(),

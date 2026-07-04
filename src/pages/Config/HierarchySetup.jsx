@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { Save, ChevronRight } from 'lucide-react'
 import { saveHierarchyConfig } from '../../hooks/useHierarchyConfig'
+import useAuthStore from '../../store/authStore'
 
 export default function HierarchySetup({ config, onSaved }) {
+  const companyId = useAuthStore((s) => s.companyId)
   const [count, setCount] = useState('')
   const [step, setStep] = useState(1)
   const [levelNames, setLevelNames] = useState([])
@@ -47,7 +49,7 @@ export default function HierarchySetup({ config, onSaved }) {
     setError('')
     setSaving(true)
     try {
-      await saveHierarchyConfig(trimmed, optionalFlags)
+      await saveHierarchyConfig(companyId, trimmed, optionalFlags)
       onSaved?.()
     } catch {
       setError('Failed to save. Check your connection.')

@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, ScanLine, X, Trash2, Tag } from 'lucide-react'
 import { doc, getDoc } from 'firebase/firestore'
 import { db } from '../../lib/firebase'
+import { companyDoc } from '../../lib/tenant'
+import useAuthStore from '../../store/authStore'
 import {
   useMainCategories, addMainCategory,
   useSubCategories, addSubCategory,
@@ -19,6 +21,7 @@ export default function SKUForm() {
   const navigate = useNavigate()
   const { id } = useParams()
   const isEdit = Boolean(id)
+  const companyId = useAuthStore((s) => s.companyId)
 
   // Hierarchy selections
   const [mainCategory, setMainCategory]   = useState(null)  // { id, name }
@@ -107,8 +110,8 @@ export default function SKUForm() {
 
   // Load existing SKU when editing
   useEffect(() => {
-    if (!isEdit) return
-    getDoc(doc(db, 'products', id)).then((snap) => {
+    if (!isEdit || !companyId) return
+    getDoc(companyDoc(companyId, 'products', id)).then((snap) => {
       if (snap.exists()) {
         const d = snap.data()
         // Config-sourced products have their own edit page
@@ -131,7 +134,7 @@ export default function SKUForm() {
       }
       setFetching(false)
     })
-  }, [id, isEdit])
+  }, [id, isEdit, companyId])
 
   async function lookupBarcode(code) {
     setBarcode(code)
@@ -197,8 +200,8 @@ export default function SKUForm() {
         name:     displayName,
         category: mainCategory.name,
       }
-      if (isEdit) await updateProduct(id, data)
-      else        await addProduct(data)
+      if (isEdit) await updateProduct(companyId, id, data)
+      else        await addProduct(companyId, data)
       navigate('/products')
     } catch {
       alert('Failed to save. Please try again.')
@@ -209,7 +212,7 @@ export default function SKUForm() {
 
   async function handleDelete() {
     if (!confirm('Delete this product?')) return
-    await deleteProduct(id)
+    await deleteProduct(companyId, id)
     navigate('/products')
   }
 
@@ -251,7 +254,7 @@ export default function SKUForm() {
             value={mainCategory}
             onChange={handleMainCategoryChange}
             options={mainCategories}
-            onCreateNew={(name) => addMainCategory(name)}
+            onCreateNew={(name) => addMainCategory(companyId, name)}
             placeholder="Select main category"
           />
 
@@ -264,7 +267,7 @@ export default function SKUForm() {
                 value={skipSubCat ? null : subCategory}
                 onChange={handleSubCategoryChange}
                 options={subCategories}
-                onCreateNew={(name) => addSubCategory(name, mainCategory.id, mainCategory.name)}
+                onCreateNew={(name) => addSubCategory(companyId, name, mainCategory.id, mainCategory.name)}
                 placeholder="Select sub category"
                 disabled={skipSubCat}
               />
@@ -292,6 +295,7 @@ export default function SKUForm() {
               options={productNames}
               onCreateNew={(name) =>
                 addProductName(
+                  companyId,
                   name,
                   mainCategory.id, mainCategory.name,
                   skipSubCat ? null : subCategory?.id,

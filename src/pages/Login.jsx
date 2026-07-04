@@ -2,21 +2,22 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore'
-import { auth, db } from '../lib/firebase'
-import { Package, User, Mail, Lock, AtSign, Eye, EyeOff } from 'lucide-react'
+import { httpsCallable } from 'firebase/functions'
+import { auth, db, defaultDb, functions } from '../lib/firebase'
+import { Package, User, Mail, Lock, AtSign, Eye, EyeOff, Building2 } from 'lucide-react'
 
 const FAKE_DOMAIN = '@inveman.app'
 
 async function resolveAuthEmail(usernameOrEmail) {
   if (usernameOrEmail.includes('@')) return usernameOrEmail
-  const snap = await getDoc(doc(db, 'usernames', usernameOrEmail.toLowerCase()))
-  if (!snap.exists()) return null
+  const snap = await getDoc(doc(defaultDb, 'usernames', usernameOrEmail.toLowerCase()))
+  if (!snap.exists) return null
   return snap.data().authEmail
 }
 
 async function isUsernameTaken(username) {
-  const snap = await getDoc(doc(db, 'usernames', username.toLowerCase()))
-  return snap.exists()
+  const snap = await getDoc(doc(defaultDb, 'usernames', username.toLowerCase()))
+  return snap.exists
 }
 
 function friendlyError(code) {
@@ -120,6 +121,7 @@ export default function Login() {
   const [email, setEmail]             = useState('')
   const [password, setPassword]       = useState('')
   const [confirmPw, setConfirmPw]     = useState('')
+  const [companyName, setCompanyName] = useState('')
 
   const [error, setError]   = useState('')
   const [loading, setLoading] = useState(false)
@@ -151,6 +153,7 @@ export default function Login() {
     if (!displayName.trim())                  { setError('Display name is required.'); return }
     if (!username.trim())                     { setError('Username is required.'); return }
     if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) { setError('Username: 3–20 chars, letters/numbers/underscore only.'); return }
+    if (!companyName.trim())                  { setError('Company name is required.'); return }
     if (password.length < 6)                  { setError('Password must be at least 6 characters.'); return }
     if (password !== confirmPw)               { setError('Passwords do not match.'); return }
 
@@ -169,9 +172,10 @@ export default function Login() {
       await updateProfile(cred.user, { displayName: displayName.trim() })
 
       // Save username → authEmail mapping (public lookup for login)
-      await setDoc(doc(db, 'usernames', username.toLowerCase()), { authEmail })
+      // Use (default) database since usernames is global, pre-auth collection
+      await setDoc(doc(defaultDb, 'usernames', username.toLowerCase()), { authEmail })
 
-      // Save full profile
+      // Save full profile in default database (global, not company-scoped)
       await setDoc(doc(db, 'users', cred.user.uid), {
         username: username.toLowerCase(),
         displayName: displayName.trim(),
@@ -179,9 +183,17 @@ export default function Login() {
         authEmail,
         createdAt: serverTimestamp(),
       })
+
+      // Call createCompany Cloud Function to set up company and custom claims
+      const createCompanyFn = httpsCallable(functions, 'createCompany')
+      await createCompanyFn({ companyName: companyName.trim() })
+
+      // Force token refresh to pick up new custom claims (companyId, role)
+      await cred.user.getIdToken(true)
+
       navigate('/', { replace: true })
     } catch (err) {
-      setError(friendlyError(err.code))
+      setError(friendlyError(err.code) || 'Failed to create company. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -263,6 +275,13 @@ export default function Login() {
               placeholder="unique_username"
               hint="3–20 chars · letters, numbers, underscore"
               autoComplete="username"
+            />
+            <Field
+              label="Company Name" required
+              icon={<Building2 size={15} color="#9ca3af" />}
+              value={companyName} onChange={setCompanyName}
+              placeholder="Your shop or business name"
+              autoCapitalize="words"
             />
             <Field
               label="Email" badge="Optional"

@@ -1,59 +1,67 @@
 import { useEffect, useState } from 'react'
 import {
-  collection, onSnapshot, addDoc, query, orderBy, serverTimestamp, where,
+  onSnapshot, addDoc, query, orderBy, serverTimestamp, where,
 } from 'firebase/firestore'
-import { db } from '../lib/firebase'
+import { companyCol } from '../lib/tenant'
+import useAuthStore from '../store/authStore'
 
 const byName = (a, b) => a.name.localeCompare(b.name)
 
 // ─── Main Categories ──────────────────────────────────────────────────────────
 
 export function useMainCategories() {
+  const companyId = useAuthStore((s) => s.companyId)
   const [mainCategories, setMainCategories] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Single-field orderBy — no composite index needed
-    const q = query(collection(db, 'mainCategories'), orderBy('name'))
+    if (!companyId) {
+      setMainCategories([])
+      setLoading(false)
+      return
+    }
+
+    const q = query(companyCol(companyId, 'mainCategories'), orderBy('name'))
     return onSnapshot(q, (snap) => {
       setMainCategories(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
       setLoading(false)
     }, () => setLoading(false))
-  }, [])
+  }, [companyId])
 
   return { mainCategories, loading }
 }
 
-export async function addMainCategory(name) {
-  const ref = await addDoc(collection(db, 'mainCategories'), { name, createdAt: serverTimestamp() })
+export async function addMainCategory(companyId, name) {
+  const ref = await addDoc(companyCol(companyId, 'mainCategories'), { name, createdAt: serverTimestamp() })
   return { id: ref.id, name }
 }
 
 // ─── Sub Categories ───────────────────────────────────────────────────────────
 
 export function useSubCategories(mainCategoryId) {
+  const companyId = useAuthStore((s) => s.companyId)
   const [subCategories, setSubCategories] = useState([])
 
   useEffect(() => {
-    if (!mainCategoryId) { setSubCategories([]); return }
+    if (!companyId) {
+      setSubCategories([])
+      return
+    }
 
-    // Only where — no composite index needed, sort client-side
-    const q = query(
-      collection(db, 'subCategories'),
-      where('mainCategoryId', '==', mainCategoryId)
-    )
+    // Load all sub categories (independent of main category selection)
+    const q = query(companyCol(companyId, 'subCategories'), orderBy('name'))
     return onSnapshot(q, (snap) => {
       setSubCategories(
         snap.docs.map((d) => ({ id: d.id, ...d.data() })).sort(byName)
       )
     })
-  }, [mainCategoryId])
+  }, [companyId])
 
   return { subCategories }
 }
 
-export async function addSubCategory(name, mainCategoryId, mainCategoryName) {
-  const ref = await addDoc(collection(db, 'subCategories'), {
+export async function addSubCategory(companyId, name, mainCategoryId, mainCategoryName) {
+  const ref = await addDoc(companyCol(companyId, 'subCategories'), {
     name, mainCategoryId, mainCategoryName, createdAt: serverTimestamp(),
   })
   return { id: ref.id, name }
@@ -62,32 +70,27 @@ export async function addSubCategory(name, mainCategoryId, mainCategoryName) {
 // ─── Product Names ────────────────────────────────────────────────────────────
 
 export function useProductNames(mainCategoryId, subCategoryId) {
+  const companyId = useAuthStore((s) => s.companyId)
   const [productNames, setProductNames] = useState([])
 
   useEffect(() => {
-    if (!mainCategoryId) { setProductNames([]); return }
+    if (!companyId || !mainCategoryId) {
+      setProductNames([])
+      return
+    }
 
-    // Filter by mainCategoryId only, then filter subCategoryId client-side
-    // Avoids composite index requirement
-    const q = query(
-      collection(db, 'productNames'),
-      where('mainCategoryId', '==', mainCategoryId)
-    )
-
+    // Load all product names (independent of main/sub category selection)
+    const q = query(companyCol(companyId, 'productNames'), orderBy('name'))
     return onSnapshot(q, (snap) => {
-      const all = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
-      const filtered = subCategoryId
-        ? all.filter((p) => p.subCategoryId === subCategoryId)
-        : all.filter((p) => !p.subCategoryId)
-      setProductNames(filtered.sort(byName))
+      setProductNames(snap.docs.map((d) => ({ id: d.id, ...d.data() })).sort(byName))
     })
-  }, [mainCategoryId, subCategoryId])
+  }, [companyId, mainCategoryId])
 
   return { productNames }
 }
 
-export async function addProductName(name, mainCategoryId, mainCategoryName, subCategoryId, subCategoryName) {
-  const ref = await addDoc(collection(db, 'productNames'), {
+export async function addProductName(companyId, name, mainCategoryId, mainCategoryName, subCategoryId, subCategoryName) {
+  const ref = await addDoc(companyCol(companyId, 'productNames'), {
     name,
     mainCategoryId,
     mainCategoryName,

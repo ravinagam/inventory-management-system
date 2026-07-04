@@ -1,0 +1,42 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAuth() { return request.auth != null; }
+    function companyId() { return request.auth.token.companyId; }
+    function isCompanyMember(cid) { return isAuth() && companyId() == cid; }
+    function isOwner(cid) { return isCompanyMember(cid) && request.auth.token.role == 'owner'; }
+
+    // Company documents and all subcollections
+    match /companies/{cid} {
+      allow read: if isCompanyMember(cid);
+      allow create: if false;   // Only Cloud Functions create companies
+      allow update: if isOwner(cid);
+      allow delete: if false;
+
+      // All company subcollections
+      match /{subcollection=**} {
+        allow read, write: if isCompanyMember(cid);
+      }
+    }
+
+    // Global collections (not company-scoped)
+    match /usernames/{username} {
+      allow read: if true;
+      allow write: if isAuth();
+    }
+
+    // User profiles (scoped to own user)
+    match /users/{uid} {
+      allow read: if isAuth() && request.auth.uid == uid;
+      allow create: if isAuth() && request.auth.uid == uid;
+      allow update: if isAuth() && request.auth.uid == uid;
+      allow delete: if false;
+    }
+
+    // Deny everything else
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

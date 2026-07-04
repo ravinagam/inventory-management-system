@@ -1,0 +1,7 @@
+file 'C:/work/InventoryManagementSystem/video_out/00_clip.mp4'
+file 'C:/work/InventoryManagementSystem/video_out/01_clip.mp4'
+file 'C:/work/InventoryManagementSystem/video_out/02_clip.mp4'
+file 'C:/work/InventoryManagementSystem/video_out/03_clip.mp4'
+file 'C:/work/InventoryManagementSystem/video_out/04_clip.mp4'
+file 'C:/work/InventoryManagementSystem/video_out/05_clip.mp4'
+file 'C:/work/InventoryManagementSystem/video_out/06_clip.mp4'

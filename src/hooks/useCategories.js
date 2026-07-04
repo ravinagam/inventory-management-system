@@ -1,27 +1,33 @@
 import { useEffect, useState } from 'react'
 import {
-  collection, onSnapshot, addDoc, query, orderBy, serverTimestamp,
+  onSnapshot, addDoc, query, orderBy, serverTimestamp,
 } from 'firebase/firestore'
-import { db } from '../lib/firebase'
-
-const COL = 'categories'
+import { companyCol } from '../lib/tenant'
+import useAuthStore from '../store/authStore'
 
 export function useCategories() {
+  const companyId = useAuthStore((s) => s.companyId)
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const q = query(collection(db, COL), orderBy('name'))
+    if (!companyId) {
+      setCategories([])
+      setLoading(false)
+      return
+    }
+
+    const q = query(companyCol(companyId, 'categories'), orderBy('name'))
     const unsub = onSnapshot(q, (snap) => {
       setCategories(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
       setLoading(false)
     })
     return unsub
-  }, [])
+  }, [companyId])
 
   return { categories, loading }
 }
 
-export async function addCategory(name) {
-  await addDoc(collection(db, COL), { name, createdAt: serverTimestamp() })
+export async function addCategory(companyId, name) {
+  await addDoc(companyCol(companyId, 'categories'), { name, createdAt: serverTimestamp() })
 }

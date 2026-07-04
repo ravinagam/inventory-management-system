@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>UI Redesign Preview</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  * { box-sizing: border-box; }
+  body { background: #e5e7eb; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  .phone { width: 390px; height: 844px; background: #f8fafc; border-radius: 40px; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,0.25), inset 0 0 0 1px rgba(0,0,0,0.1); position: relative; display: flex; flex-direction: column; }
+  .screen { flex: 1; overflow-y: auto; padding-bottom: 72px; }
+  .screen::-webkit-scrollbar { display: none; }
+
+  /* Header */
+  .app-header { background: linear-gradient(135deg, #1e3a5f 0%, #1d4ed8 60%, #2563eb 100%); padding: 14px 16px 12px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+  .avatar { width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.4); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; color: #fff; flex-shrink: 0; }
+  .header-title { flex: 1; }
+  .header-title .company { font-size: 16px; font-weight: 700; color: #fff; letter-spacing: -0.3px; }
+  .header-title .subtitle { font-size: 11px; color: rgba(255,255,255,0.65); margin-top: 1px; }
+
+  /* Bottom nav */
+  .bottom-nav { background: #fff; border-top: 1px solid #e5e7eb; display: flex; padding: 8px 4px 12px; flex-shrink: 0; }
+  .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 4px 0; position: relative; }
+  .nav-icon { width: 40px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 14px; transition: background 0.2s; }
+  .nav-icon.active { background: #dbeafe; }
+  .nav-label { font-size: 10px; color: #9ca3af; font-weight: 500; }
+  .nav-label.active { color: #1d4ed8; font-weight: 600; }
+
+  /* Cards */
+  .card { background: #fff; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04); }
+  .card-elevated { background: #fff; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+
+  /* Stat cards */
+  .stat-card { background: #fff; border-radius: 14px; padding: 14px; flex: 1; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+
+  /* Pill */
+  .pill { padding: 5px 14px; border-radius: 999px; font-size: 12px; font-weight: 600; border: 1px solid; cursor: pointer; white-space: nowrap; }
+  .pill-active { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
+  .pill-inactive { background: #fff; color: #6b7280; border-color: #e5e7eb; }
+
+  /* Section label */
+  .section-label { font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.8px; }
+
+  /* Badge */
+  .badge-red { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+  .badge-green { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+  .badge-blue { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+  .badge-amber { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+
+  /* Page nav row */
+  .page-nav { display: flex; align-items: center; gap: 10px; padding: 16px 16px 8px; }
+  .back-btn { width: 34px; height: 34px; background: #fff; border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+
+  /* Screen selector */
+  .screen-tabs { display: flex; gap: 8px; overflow-x: auto; padding: 16px; background: #fff; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 24px; }
+  .screen-tabs::-webkit-scrollbar { display: none; }
+  .screen-tab { padding: 7px 16px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; border: none; }
+  .screen-tab.active { background: #1d4ed8; color: #fff; }
+  .screen-tab.inactive { background: #f1f5f9; color: #475569; }
+
+  .screens-row { display: flex; gap: 32px; justify-content: center; flex-wrap: wrap; padding: 0 24px 48px; }
+  .screen-wrapper { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .screen-label { font-size: 13px; font-weight: 700; color: #374151; background: #fff; padding: 6px 16px; border-radius: 999px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+
+  /* Stock progress bar */
+  .stock-bar { height: 4px; border-radius: 2px; background: #e5e7eb; overflow: hidden; margin-top: 6px; }
+  .stock-fill-ok { height: 100%; border-radius: 2px; background: linear-gradient(90deg, #22c55e, #16a34a); }
+  .stock-fill-low { height: 100%; border-radius: 2px; background: linear-gradient(90deg, #f97316, #ef4444); }
+
+  /* Alert card */
+  .alert-card { border-radius: 12px; border-left: 4px solid; padding: 12px 14px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+
+  /* Action btn group */
+  .action-group { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .action-btn { padding: 12px 8px; border-radius: 12px; text-align: center; font-size: 13px; font-weight: 600; border: 1.5px solid; cursor: pointer; }
+
+  /* Audit row */
+  .audit-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #f1f5f9; }
+
+  /* Page title row */
+  .page-title { font-size: 20px; font-weight: 800; color: #111827; letter-spacing: -0.4px; }
+
+  /* Input */
+  .inp { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1.5px solid #e5e7eb; font-size: 14px; background: #f9fafb; color: #111827; outline: none; }
+  .inp:focus { border-color: #1d4ed8; background: #fff; }
+
+  /* Report card */
+  .report-item { padding: 14px 16px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+  .report-item:last-child { border-bottom: none; }
+</style>
+</head>
+<body>
+
+<div style="padding: 24px 0 0; text-align:center;">
+  <h1 style="font-size:24px;font-weight:800;color:#111827;letter-spacing:-0.5px;">UI Redesign Preview</h1>
+  <p style="color:#6b7280;font-size:14px;margin-top:4px;">Scroll right to see all screens</p>
+</div>
+
+<div class="screens-row" style="padding-top: 24px;">
+
+  <!-- ───────────────────────── DASHBOARD ───────────────────────── -->
+  <div class="screen-wrapper">
+    <div class="screen-label">Dashboard</div>
+    <div class="phone">
+      <div class="app-header">
+        <div class="avatar">RK</div>
+        <div class="header-title">
+          <div class="company">Sri Stores</div>
+          <div class="subtitle">Inventory Management</div>
+        </div>
+      </div>
+      <div class="screen" style="background:#f1f5f9;">
+        <div style="padding:16px;display:flex;flex-direction:column;gap:14px;">
+
+          <!-- Stats row -->
+          <div style="display:flex;gap:10px;">
+            <div class="stat-card" style="text-align:center;">
+              <div style="font-size:22px;font-weight:800;color:#1d4ed8;">5</div>
+              <div style="font-size:11px;color:#6b7280;font-weight:500;margin-top:2px;">Products</div>
+            </div>
+            <div class="stat-card" style="text-align:center;">
+              <div style="font-size:22px;font-weight:800;color:#dc2626;">2</div>
+              <div style="font-size:11px;color:#6b7280;font-weight:500;margin-top:2px;">Low Stock</div>
+            </div>
+            <div class="stat-card" style="text-align:center;">
+              <div style="font-size:22px;font-weight:800;color:#16a34a;">537</div>
+              <div style="font-size:11px;color:#6b7280;font-weight:500;margin-top:2px;">Total Units</div>
+            </div>
+          </div>
+
+          <!-- Low Stock Alerts -->
+          <div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+              <div class="section-label">⚠ Low Stock Alerts</div>
+              <span class="badge-red">2 items</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div class="alert-card" style="border-color:#ef4444;">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                  <div>
+                    <div style="font-size:14px;font-weight:700;color:#111827;">Plates Leaf Plates 14in</div>
+                    <div style="font-size:12px;color:#6b7280;margin-top:2px;">Min required: 20 units</div>
+                  </div>
+                  <div style="text-align:right;">
+                    <div style="font-size:18px;font-weight:800;color:#dc2626;">18</div>
+                    <div style="font-size:11px;color:#dc2626;">units left</div>
+                  </div>
+                </div>
+                <div class="stock-bar" style="margin-top:10px;">
+                  <div class="stock-fill-low" style="width:45%;"></div>
+                </div>
+              </div>
+              <div class="alert-card" style="border-color:#f97316;">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                  <div>
+                    <div style="font-size:14px;font-weight:700;color:#111827;">Glasses Nokia 5x7</div>
+                    <div style="font-size:12px;color:#6b7280;margin-top:2px;">Min required: 50 units</div>
+                  </div>
+                  <div style="text-align:right;">
+                    <div style="font-size:18px;font-weight:800;color:#f97316;">40</div>
+                    <div style="font-size:11px;color:#f97316;">units left</div>
+                  </div>
+                </div>
+                <div class="stock-bar" style="margin-top:10px;">
+                  <div class="stock-fill-low" style="width:35%;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Activity -->
+          <div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+              <div class="section-label">Recent Activity</div>
+            </div>
+            <div class="card">
+              <div style="padding:12px 14px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:12px;">
+                <div style="width:34px;height:34px;border-radius:10px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <span style="font-size:16px;">📦</span>
+                </div>
+                <div style="flex:1;min-width:0;">
+                  <div style="font-size:13px;font-weight:600;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Stock In — Glasses KF Normal 5x7</div>
+                  <div style="font-size:11px;color:#6b7280;margin-top:1px;">+50 units · 2h ago</div>
+                </div>
+                <span class="badge-green">+50</span>
+              </div>
+              <div style="padding:12px 14px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:12px;">
+                <div style="width:34px;height:34px;border-radius:10px;background:#fef2f2;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <span style="font-size:16px;">🛒</span>
+                </div>
+                <div style="flex:1;min-width:0;">
+                  <div style="font-size:13px;font-weight:600;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Stock Out — Plates Multi Color 12in</div>
+                  <div style="font-size:11px;color:#6b7280;margin-top:1px;">−30 units · 5h ago</div>
+                </div>
+                <span class="badge-red">-30</span>
+              </div>
+              <div style="padding:12px 14px;display:flex;align-items:center;gap:12px;">
+                <div style="width:34px;height:34px;border-radius:10px;background:#eff6ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <span style="font-size:16px;">✏️</span>
+                </div>
+                <div style="flex:1;min-width:0;">
+                  <div style="font-size:13px;font-weight:600;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Adjust — Glasses Mahalakshmi 5x7</div>
+                  <div style="font-size:11px;color:#6b7280;margin-top:1px;">Set to 159 · Yesterday</div>
+                </div>
+                <span class="badge-blue">Adj</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <!-- Bottom nav -->
+      <div class="bottom-nav">
+        <div class="nav-item">
+          <div class="nav-icon active"><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" stroke="#1d4ed8" stroke-width="2" stroke-linejoin="round"/><path d="M9 21V12h6v9" stroke="#1d4ed8" stroke-width="2" stroke-linejoin="round"/></svg></div>
+          <span class="nav-label active">Dashboard</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="#9ca3af" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="#9ca3af" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="#9ca3af" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="#9ca3af" stroke-width="2"/></svg></div>
+          <span class="nav-label">Products</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M4 12h16M4 6h16M4 18h16" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/></svg></div>
+          <span class="nav-label">Inventory</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/></svg></div>
+          <span class="nav-label">Audit</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/></svg></div>
+          <span class="nav-label">Reports</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" stroke="#9ca3af" stroke-width="2"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" stroke="#9ca3af" stroke-width="2"/></svg></div>
+          <span class="nav-label">Settings</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────────────────────── PRODUCTS ───────────────────────── -->
+  <div class="screen-wrapper">
+    <div class="screen-label">Products</div>
+    <div class="phone">
+      <div class="app-header">
+        <div class="avatar">RK</div>
+        <div class="header-title">
+          <div class="company">Sri Stores</div>
+          <div class="subtitle">Inventory Management</div>
+        </div>
+      </div>
+      <div class="screen" style="background:#f1f5f9;">
+        <div style="padding:16px;display:flex;flex-direction:column;gap:14px;">
+
+          <!-- Title + Add btn -->
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div class="page-title">Products</div>
+            <button style="background:linear-gradient(135deg,#1d4ed8,#2563eb);color:#fff;border:none;padding:9px 18px;border-radius:12px;font-size:13px;font-weight:700;box-shadow:0 2px 8px rgba(29,78,216,0.35);cursor:pointer;">+ Add Product</button>
+          </div>
+
+          <!-- Search -->
+          <div style="position:relative;">
+            <svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#9ca3af;" width="15" height="15" fill="none" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" stroke="#9ca3af" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/></svg>
+            <input class="inp" style="padding-left:38px;background:#fff;" placeholder="Search by name or product code…" />
+          </div>
+
+          <!-- Category pills -->
+          <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;">
+            <span class="pill pill-active">All</span>
+            <span class="pill pill-inactive">Plates</span>
+            <span class="pill pill-inactive">Glasses</span>
+          </div>
+
+          <!-- Product list -->
+          <div class="card">
+            <!-- Item 1 -->
+            <div style="padding:14px 16px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:12px;cursor:pointer;">
+              <div style="width:40px;height:40px;border-radius:12px;background:#eff6ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;">🥛</div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:14px;font-weight:700;color:#111827;">Glasses KF Normal 5x7</div>
+                <div style="display:flex;align-items:center;gap:6px;margin-top:3px;">
+                  <span style="font-size:11px;font-family:monospace;background:#eff6ff;color:#1d4ed8;padding:2px 6px;border-radius:6px;font-weight:600;">GLAS-KFNO-5X7</span>
+                  <span style="font-size:11px;color:#9ca3af;">Glasses › KF Normal</span>
+                </div>
+                <div class="stock-bar"><div class="stock-fill-ok" style="width:100%;"></div></div>
+              </div>
+              <div style="text-align:right;flex-shrink:0;">
+                <div style="font-size:16px;font-weight:800;color:#16a34a;">100</div>
+                <div style="font-size:10px;color:#9ca3af;">in stock</div>
+              </div>
+            </div>
+            <!-- Item 2 — LOW -->
+            <div style="padding:14px 16px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:12px;cursor:pointer;background:#fffbf9;">
+              <div style="width:40px;height:40px;border-radius:12px;background:#fff7ed;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;">🍽️</div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:14px;font-weight:700;color:#111827;">Plates Leaf Plates 14 Inches</div>
+                <div style="display:flex;align-items:center;gap:6px;margin-top:3px;">
+                  <span style="font-size:11px;font-family:monospace;background:#fff7ed;color:#ea580c;padding:2px 6px;border-radius:6px;font-weight:600;">PLAT-LEAF-14IN</span>
+                  <span class="badge-red">Low</span>
+                </div>
+                <div class="stock-bar"><div class="stock-fill-low" style="width:45%;"></div></div>
+              </div>
+              <div style="text-align:right;flex-shrink:0;">
+                <div style="font-size:16px;font-weight:800;color:#dc2626;">18</div>
+                <div style="font-size:10px;color:#dc2626;">min: 20</div>
+              </div>
+            </div>
+            <!-- Item 3 -->
+            <div style="padding:14px 16px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:12px;cursor:pointer;">
+              <div style="width:40px;height:40px;border-radius:12px;background:#eff6ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;">🥛</div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:14px;font-weight:700;color:#111827;">Glasses Mahalakshmi 5x7</div>
+                <div style="display:flex;align-items:center;gap:6px;margin-top:3px;">
+                  <span style="font-size:11px;font-family:monospace;background:#eff6ff;color:#1d4ed8;padding:2px 6px;border-radius:6px;font-weight:600;">GLAS-MAHA-5X7</span>
+                </div>
+                <div class="stock-bar"><div class="stock-fill-ok" style="width:80%;"></div></div>
+              </div>
+              <div style="text-align:right;flex-shrink:0;">
+                <div style="font-size:16px;font-weight:800;color:#16a34a;">159</div>
+                <div style="font-size:10px;color:#9ca3af;">in stock</div>
+              </div>
+            </div>
+            <!-- Item 4 -->
+            <div style="padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;">
+              <div style="width:40px;height:40px;border-radius:12px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;">🍽️</div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:14px;font-weight:700;color:#111827;">Plates Multi Color 12 Inches</div>
+                <div style="display:flex;align-items:center;gap:6px;margin-top:3px;">
+                  <span style="font-size:11px;font-family:monospace;background:#f0fdf4;color:#16a34a;padding:2px 6px;border-radius:6px;font-weight:600;">PLAT-MULT-12IN</span>
+                </div>
+                <div class="stock-bar"><div class="stock-fill-ok" style="width:95%;"></div></div>
+              </div>
+              <div style="text-align:right;flex-shrink:0;">
+                <div style="font-size:16px;font-weight:800;color:#16a34a;">220</div>
+                <div style="font-size:10px;color:#9ca3af;">in stock</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item"><div class="nav-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" stroke="#9ca3af" stroke-width="2" stroke-linejoin="round"/><path d="M9 21V12h6v9" stroke="#9ca3af" stroke-width="2" stroke-linejoin="round"/></svg></div><span class="nav-label">Dashboard</span></div>
+        <div class="nav-item"><div class="nav-icon active"><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="#1d4ed8" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="#1d4ed8" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="#1d4ed8" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="#1d4ed8" stroke-width="2"/></svg></div><span class="nav-label active">Products</span></div>
+        <div class="nav-item"><div class="nav-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M4 12h16M4 6h16M4 18h16" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/></svg></div><span class="nav-label">Inventory</span></div>
+        <div class="nav-item"><div class="nav-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/></svg></div><span class="nav-label">Audit</span></div>
+        <div class="nav-item"><div class="nav-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/></svg></div><span class="nav-label">Reports</span></div>
+        <div class="nav-item"><div class="nav-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" stroke="#9ca3af" stroke-width="2"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" stroke="#9ca3af" stroke-width="2"/></svg></div><span class="nav-label">Settings</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────────────────────── INVENTORY UPDATE ───────────────────────── -->
+  <div class="screen-wrapper">
+    <div class="screen-label">Update Inventory</div>
+    <div class="phone">
+      <div class="app-header">
+        <div class="avatar">RK</div>
+        <div class="header-title">
+          <div class="company">Sri Stores</div>
+          <div class="subtitle">Inventory Management</div>
+        </div>
+      </div>
+      <div class="screen" style="background:#f1f5f9;">
+        <div style="padding:16px;display:flex;flex-direction:column;gap:14px;">
+
+          <!-- Page title with back -->
+          <div class="page-nav" style="padding:0;">
+            <div class="back-btn">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7" stroke="#374151" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="page-title">Update Inventory</div>
+          </div>
+
+          <!-- Selected Product chip -->
+          <div class="card" style="padding:14px 16px;display:flex;align-items:center;gap:12px;">
+            <div style="width:42px;height:42px;border-radius:12px;background:#eff6ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px;">🥛</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:14px;font-weight:700;color:#111827;">Glasses KF Normal 5x7</div>
+              <div style="font-size:12px;color:#6b7280;margin-top:2px;">Current stock: <strong style="color:#16a34a;">100 units</strong></div>
+            </div>
+            <button style="background:#fef2f2;border:none;border-radius:8px;padding:6px 8px;cursor:pointer;color:#dc2626;font-size:11px;font-weight:600;">Change</button>
+          </div>
+
+          <!-- Action selector -->
+          <div class="card" style="padding:14px 16px;">
+            <div class="section-label" style="margin-bottom:10px;">Action</div>
+            <div class="action-group">
+              <div class="action-btn" style="background:#f0fdf4;color:#16a34a;border-color:#bbf7d0;">
+                <div style="font-size:18px;margin-bottom:4px;">📦</div>
+                Stock In
+              </div>
+              <div class="action-btn" style="background:#fff;color:#6b7280;border-color:#e5e7eb;">
+                <div style="font-size:18px;margin-bottom:4px;">🛒</div>
+                Stock Out
+              </div>
+              <div class="action-btn" style="background:#fff;color:#6b7280;border-color:#e5e7eb;">
+                <div style="font-size:18px;margin-bottom:4px;">✏️</div>
+                Adjust
+              </div>
+            </div>
+          </div>
+
+          <!-- Quantity + preview -->
+          <div class="card" style="padding:14px 16px;">
+            <div class="section-label" style="margin-bottom:10px;">Quantity</div>
+            <input class="inp" type="number" placeholder="Enter quantity" value="25" />
+            <!-- Stock preview -->
+            <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-top:12px;padding:10px;background:#f0fdf4;border-radius:10px;">
+              <span style="font-size:18px;font-weight:800;color:#6b7280;">100</span>
+              <span style="font-size:14px;color:#16a34a;font-weight:700;">→</span>
+              <span style="font-size:22px;font-weight:800;color:#16a34a;">125</span>
+              <span style="font-size:12px;color:#16a34a;">units</span>
+            </div>
+          </div>
+
+          <!-- Notes -->
+          <div class="card" style="padding:14px 16px;">
+            <div class="section-label" style="margin-bottom:10px;">Notes <span style="text-transform:none;font-weight:400;color:#9ca3af;font-size:12px;">(optional)</span></div>
+            <textarea class="inp" rows="3" placeholder="Reason, supplier, delivery note…" style="resize:none;"></textarea>
+          </div>
+
+          <!-- Save btn -->
+          <button style="background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;width:100%;padding:15px;border-radius:14px;font-size:15px;font-weight:700;box-shadow:0 3px 10px rgba(22,163,74,0.35);cursor:pointer;letter-spacing:-0.2px;">Save Stock Update</button>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item"><div class="nav-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" stroke="#9ca3af" stroke-width="2" stroke-linejoin="round"/><path d="M9 21V12h6v9" stroke="#9ca3af" stroke-width="2" stroke-linejoin="round"/></svg></div><span class="nav-label">Dashboard</span></div>
+        <div class="nav-item"><div class="nav-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="#9ca3af" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="#9ca3af" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="#9ca3af" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="#9ca3af" stroke-width="2"/></svg></div><span class="nav-label">Products</span></div>
+        <div class="nav-item"><div class="nav-icon active"><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M4 12h16M4 6h16M4 18h16" stroke="#1d4ed8" stroke-width="2" stroke-linecap="round"/></svg></div><span class="nav-label active">Inventory</span></div>
+        <div class="nav-item"><div class="nav-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/></svg></div><span class="nav-label">Audit</span></div>
+        <div class="nav-item"><div class="nav-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/></svg></div><span class="nav-label">Reports</span></div>
+        <div class="nav-item"><div class="nav-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" stroke="#9ca3af" stroke-width="2"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" stroke="#9ca3af" stroke-width="2"/></svg></div><span class="nav-label">Settings</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────────────────────── REPORTS ───────────────────────── -->
+  <div class="screen-wrapper">
+    <div class="screen-label">Reports</div>
+    <div class="phone">
+      <div class="app-header">
+        <div class="avatar">RK</div>
+        <div class="header-title">
+          <div class="company">Sri Stores</div>
+          <div class="subtitle">Inventory Management</div>
+        </div>
+      </div>
+      <div class="screen" style="background:#f1f5f9;">
+        <div style="padding:16px;display:flex;flex-direction:column;gap:14px;">
+
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div class="page-title">Reports</div>
+            <button style="background:#fff;border:1.5px solid #e5e7eb;color:#374151;padding:8px 14px;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="#374151" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Export CSV
+            </button>
+          </div>
+
+          <!-- Stats -->
+          <div style="display:flex;gap:10px;">
+            <div class="stat-card" style="text-align:center;">
+              <div style="font-size:22px;font-weight:800;color:#1d4ed8;">5</div>
+              <div style="font-size:11px;color:#6b7280;font-weight:500;margin-top:2px;">Products</div>
+            </div>
+            <div class="stat-card" style="text-align:center;">
+              <div style="font-size:22px;font-weight:800;color:#dc2626;">2</div>
+              <div style="font-size:11px;color:#6b7280;font-weight:500;margin-top:2px;">Low Stock</div>
+            </div>
+            <div class="stat-card" style="text-align:center;">
+              <div style="font-size:22px;font-weight:800;color:#16a34a;">537</div>
+              <div style="font-size:11px;color:#6b7280;font-weight:500;margin-top:2px;">Total Units</div>
+            </div>
+          </div>
+
+          <!-- Search + filter -->
+          <div style="position:relative;">
+            <svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);" width="15" height="15" fill="none" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" stroke="#9ca3af" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/></svg>
+            <input class="inp" style="padding-left:38px;background:#fff;" placeholder="Search products…" />
+          </div>
+
+          <!-- Cards (mobile-first, no table) -->
+          <div class="card">
+            <div class="report-item">
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:14px;font-weight:700;color:#111827;">Glasses KF Normal 5x7</div>
+                <div style="font-size:11px;color:#6b7280;margin-top:2px;">Glasses › KF Normal · <span style="font-family:monospace;">GLAS-KFNO</span></div>
+              </div>
+              <div style="text-align:right;flex-shrink:0;margin-left:12px;">
+                <span style="font-size:16px;font-weight:800;color:#16a34a;">100</span>
+                <div style="font-size:10px;color:#9ca3af;">min: 50</div>
+              </div>
+            </div>
+            <div class="report-item" style="background:#fffbf9;">
+              <div style="flex:1;min-width:0;">
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <div style="font-size:14px;font-weight:700;color:#111827;">Plates Leaf 14 Inches</div>
+                  <span class="badge-red">Low</span>
+                </div>
+                <div style="font-size:11px;color:#6b7280;margin-top:2px;">Plates › Leaf · <span style="font-family:monospace;">PLAT-LEAF</span></div>
+              </div>
+              <div style="text-align:right;flex-shrink:0;margin-left:12px;">
+                <span style="font-size:16px;font-weight:800;color:#dc2626;">18</span>
+                <div style="font-size:10px;color:#dc2626;">min: 20</div>
+              </div>
+            </div>
+            <div class="report-item">
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:14px;font-weight:700;color:#111827;">Glasses Mahalakshmi 5x7</div>
+                <div style="font-size:11px;color:#6b7280;margin-top:2px;">Glasses › Mahalakshmi · <span style="font-family:monospace;">GLAS-MAHA</span></div>
+              </div>
+              <div style="text-align:right;flex-shrink:0;margin-left:12px;">
+                <span style="font-size:16px;font-weight:800;color:#16a34a;">159</span>
+                <div style="font-size:10px;color:#9ca3af;">min: 50</div>
+              </div>
+            </div>
+            <div class="report-item">
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:14px;font-weight:700;color:#111827;">Plates Multi Color 12 Inches</div>
+                <div style="font-size:11px;color:#6b7280;margin-top:2px;">Plates › Multi Color · <span style="font-family:monospace;">PLAT-MULT</span></div>
+              </div>
+              <div style="text-align:right;flex-shrink:0;margin-left:12px;">
+                <span style="font-size:16px;font-weight:800;color:#16a34a;">220</span>
+                <div style="font-size:10px;color:#9ca3af;">min: 50</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item"><div class="nav-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" stroke="#9ca3af" stroke-width="2" stroke-linejoin="round"/><path d="M9 21V12h6v9" stroke="#9ca3af" stroke-width="2" stroke-linejoin="round"/></svg></div><span class="nav-label">Dashboard</span></div>
+        <div class="nav-item"><div class="nav-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="#9ca3af" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="#9ca3af" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="#9ca3af" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="#9ca3af" stroke-width="2"/></svg></div><span class="nav-label">Products</span></div>
+        <div class="nav-item"><div class="nav-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M4 12h16M4 6h16M4 18h16" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/></svg></div><span class="nav-label">Inventory</span></div>
+        <div class="nav-item"><div class="nav-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/></svg></div><span class="nav-label">Audit</span></div>
+        <div class="nav-item"><div class="nav-icon active"><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6" stroke="#1d4ed8" stroke-width="2" stroke-linecap="round"/></svg></div><span class="nav-label active">Reports</span></div>
+        <div class="nav-item"><div class="nav-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" stroke="#9ca3af" stroke-width="2"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" stroke="#9ca3af" stroke-width="2"/></svg></div><span class="nav-label">Settings</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────────────────────── SETTINGS ───────────────────────── -->
+  <div class="screen-wrapper">
+    <div class="screen-label">Settings</div>
+    <div class="phone">
+      <div class="app-header">
+        <div class="avatar">RK</div>
+        <div class="header-title">
+          <div class="company">Sri Stores</div>
+          <div class="subtitle">Inventory Management</div>
+        </div>
+      </div>
+      <div class="screen" style="background:#f1f5f9;">
+        <div style="padding:16px;display:flex;flex-direction:column;gap:14px;">
+
+          <div class="page-title">Settings</div>
+
+          <!-- Profile card -->
+          <div class="card-elevated" style="padding:20px;display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,#1e3a5f,#1d4ed8);">
+            <div style="width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,0.2);border:2px solid rgba(255,255,255,0.5);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;color:#fff;flex-shrink:0;">RK</div>
+            <div>
+              <div style="font-size:16px;font-weight:700;color:#fff;">Ravi Kiran</div>
+              <div style="font-size:12px;color:rgba(255,255,255,0.7);margin-top:2px;">ravi.kiran@gmail.com</div>
+            </div>
+          </div>
+
+          <!-- Settings sections -->
+          <div class="section-label">Store</div>
+          <div class="card">
+            <div style="padding:14px 16px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:12px;cursor:pointer;">
+              <div style="width:36px;height:36px;border-radius:10px;background:#eff6ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">🏪</div>
+              <div style="flex:1;">
+                <div style="font-size:14px;font-weight:600;color:#111827;">Company / Shop Name</div>
+                <div style="font-size:12px;color:#6b7280;margin-top:1px;">Sri Stores</div>
+              </div>
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div style="padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;">
+              <div style="width:36px;height:36px;border-radius:10px;background:#eff6ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">🗂️</div>
+              <div style="flex:1;">
+                <div style="font-size:14px;font-weight:600;color:#111827;">Product Hierarchy</div>
+                <div style="font-size:12px;color:#6b7280;margin-top:1px;">Configure levels & manage data</div>
+              </div>
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          </div>
+
+          <div class="section-label">Account</div>
+          <div class="card">
+            <div style="padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;">
+              <div style="width:36px;height:36px;border-radius:10px;background:#fef2f2;display:flex;align-items:center;justify-content:center;flex-shrink:0;">🚪</div>
+              <div style="flex:1;">
+                <div style="font-size:14px;font-weight:600;color:#dc2626;">Sign Out</div>
+              </div>
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          </div>
+
+          <div style="text-align:center;padding-top:8px;">
+            <div style="font-size:11px;color:#9ca3af;">Inventory Management v1.0</div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item"><div class="nav-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" stroke="#9ca3af" stroke-width="2" stroke-linejoin="round"/><path d="M9 21V12h6v9" stroke="#9ca3af" stroke-width="2" stroke-linejoin="round"/></svg></div><span class="nav-label">Dashboard</span></div>
+        <div class="nav-item"><div class="nav-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="#9ca3af" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="#9ca3af" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="#9ca3af" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="#9ca3af" stroke-width="2"/></svg></div><span class="nav-label">Products</span></div>
+        <div class="nav-item"><div class="nav-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M4 12h16M4 6h16M4 18h16" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/></svg></div><span class="nav-label">Inventory</span></div>
+        <div class="nav-item"><div class="nav-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/></svg></div><span class="nav-label">Audit</span></div>
+        <div class="nav-item"><div class="nav-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/></svg></div><span class="nav-label">Reports</span></div>
+        <div class="nav-item"><div class="nav-icon active"><svg width="20" height="20" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" stroke="#1d4ed8" stroke-width="2"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" stroke="#1d4ed8" stroke-width="2"/></svg></div><span class="nav-label active">Settings</span></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div style="text-align:center;padding:32px;color:#9ca3af;font-size:13px;">
+  Open <code style="background:#f1f5f9;padding:2px 8px;border-radius:6px;color:#374151;">ui-preview.html</code> in your browser to review · Tell Claude to proceed when ready
+</div>
+
+</body>
+</html>

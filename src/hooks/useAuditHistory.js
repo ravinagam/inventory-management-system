@@ -1,32 +1,46 @@
 import { useEffect, useState } from 'react'
-import { collection, query, orderBy, onSnapshot, where, Timestamp } from 'firebase/firestore'
-import { db } from '../lib/firebase'
+import { query, orderBy, onSnapshot, where, Timestamp } from 'firebase/firestore'
+import { companyCol } from '../lib/tenant'
+import useAuthStore from '../store/authStore'
 
 export function useAuditHistory() {
+  const companyId = useAuthStore((s) => s.companyId)
   const [sessions, setSessions] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const q = query(collection(db, 'auditSessions'), orderBy('createdAt', 'desc'))
+    if (!companyId) {
+      setSessions([])
+      setLoading(false)
+      return
+    }
+
+    const q = query(companyCol(companyId, 'auditSessions'), orderBy('createdAt', 'desc'))
     const unsub = onSnapshot(q, (snap) => {
       setSessions(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
       setLoading(false)
     })
     return unsub
-  }, [])
+  }, [companyId])
 
   return { sessions, loading }
 }
 
 export function useTodayAuditItems() {
+  const companyId = useAuthStore((s) => s.companyId)
   const [auditItems, setAuditItems] = useState([])
 
   useEffect(() => {
+    if (!companyId) {
+      setAuditItems([])
+      return
+    }
+
     const startOfDay = new Date()
     startOfDay.setHours(0, 0, 0, 0)
 
     const q = query(
-      collection(db, 'auditSessions'),
+      companyCol(companyId, 'auditSessions'),
       where('createdAt', '>=', Timestamp.fromDate(startOfDay)),
       orderBy('createdAt', 'desc')
     )
@@ -47,7 +61,7 @@ export function useTodayAuditItems() {
     })
 
     return unsub
-  }, [])
+  }, [companyId])
 
   return { auditItems }
 }

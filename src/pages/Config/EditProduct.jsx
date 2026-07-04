@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { ArrowLeft, Save, Trash2, RefreshCw } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { doc, getDoc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore'
-import { db } from '../../lib/firebase'
+import { getDoc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore'
+import { companyDoc } from '../../lib/tenant'
+import useAuthStore from '../../store/authStore'
 import { useHierarchyConfig, useLevelItems } from '../../hooks/useHierarchyConfig'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -28,6 +29,7 @@ function autoName(selections) {
 export default function EditProduct() {
   const navigate = useNavigate()
   const { id } = useParams()
+  const companyId = useAuthStore((s) => s.companyId)
 
   const { config, loading: configLoading } = useHierarchyConfig()
   const optionalLevels = config?.optionalLevels || []
@@ -47,8 +49,8 @@ export default function EditProduct() {
 
   // Load product once config is ready
   useEffect(() => {
-    if (configLoading || !config?.levels?.length) return
-    getDoc(doc(db, 'products', id)).then((snap) => {
+    if (configLoading || !config?.levels?.length || !companyId) return
+    getDoc(companyDoc(companyId, 'products', id)).then((snap) => {
       if (snap.exists()) {
         const d = snap.data()
         const levels = config.levels
@@ -68,7 +70,7 @@ export default function EditProduct() {
       }
       setFetching(false)
     })
-  }, [id, config, configLoading])
+  }, [id, config, configLoading, companyId])
 
   const levels = config?.levels || []
   const autoSKU = buildSKU(productName, selections)
@@ -94,7 +96,7 @@ export default function EditProduct() {
       const hierarchyLevels = selections
         .map((s, i) => s ? ({ levelIndex: i, levelName: levels[i], itemId: s.id, itemName: s.name }) : null)
         .filter(Boolean)
-      await updateDoc(doc(db, 'products', id), {
+      await updateDoc(companyDoc(companyId, 'products', id), {
         hierarchyLevels,
         displayName: productName.trim(),
         sku: sku.trim(),
@@ -115,7 +117,7 @@ export default function EditProduct() {
   async function handleDelete() {
     if (!window.confirm('Delete this product? This cannot be undone.')) return
     try {
-      await deleteDoc(doc(db, 'products', id))
+      await deleteDoc(companyDoc(companyId, 'products', id))
       navigate('/products')
     } catch {
       setError('Failed to delete.')
