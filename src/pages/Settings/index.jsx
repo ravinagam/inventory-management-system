@@ -1,4 +1,4 @@
-import { ChevronRight, Store, Layers, LogOut, UserCircle } from 'lucide-react'
+import { ChevronRight, Store, Layers, LogOut, UserCircle, Edit } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { signOut } from 'firebase/auth'
 import { auth } from '../../lib/firebase'
@@ -39,7 +39,10 @@ export default function SettingsPage() {
       <h1 className="text-2xl font-black tracking-tight" style={{ color: '#111827' }}>Settings</h1>
 
       {/* Profile card */}
-      <div className="rounded-2xl overflow-hidden shadow-sm">
+      <button
+        onClick={() => navigate('/settings/profile')}
+        className="w-full rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow text-left"
+      >
         <div className="flex items-center gap-4 px-5 py-5"
           style={{ background: 'linear-gradient(135deg, #1e3a5f 0%, #1d4ed8 60%, #2563eb 100%)' }}>
           <div className="w-14 h-14 rounded-full border-2 flex items-center justify-center flex-shrink-0 overflow-hidden"
@@ -48,7 +51,7 @@ export default function SettingsPage() {
               ? <img src={user.photoURL} alt="profile" className="w-14 h-14 object-cover" />
               : <span className="text-white text-xl font-black">{initials}</span>}
           </div>
-          <div className="min-w-0">
+          <div className="flex-1 min-w-0">
             {user?.displayName && (
               <p className="text-base font-bold text-white truncate">{user.displayName}</p>
             )}
@@ -56,8 +59,9 @@ export default function SettingsPage() {
               {user?.email?.endsWith('@inveman.app') ? 'No email set' : user?.email}
             </p>
           </div>
+          <ChevronRight size={20} color="rgba(255,255,255,0.8)" />
         </div>
-      </div>
+      </button>
 
       {/* Account */}
       <div>

@@ -78,7 +78,7 @@ export default function ProductList() {
             )}
           </div>
           <button
-            onClick={() => navigate('/products/add')}
+            onClick={() => navigate('/config', { state: { tab: 2 } })}
             className="flex items-center gap-1.5 text-white text-sm font-bold px-4 py-2.5 rounded-2xl"
             style={{ background: 'linear-gradient(135deg, #1d4ed8, #2563eb)', boxShadow: '0 3px 10px rgba(29,78,216,0.35)' }}
           >

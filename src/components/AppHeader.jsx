@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect } from 'react'
 import { LogOut, User } from 'lucide-react'
 import { signOut } from 'firebase/auth'
+import { useNavigate } from 'react-router-dom'
 import { auth } from '../lib/firebase'
 import { useSettings } from '../hooks/useSettings'
 import useAuthStore from '../store/authStore'
 
 export default function AppHeader() {
+  const navigate = useNavigate()
   const { settings } = useSettings()
   const user = useAuthStore((s) => s.user)
   const name = settings.companyName || 'Retail Inventory Pro'
@@ -50,9 +52,10 @@ export default function AppHeader() {
 
           {/* Profile popup */}
           {showProfile && (
-            <div className="absolute top-12 left-0 bg-white rounded-2xl shadow-2xl w-60 z-50 overflow-hidden">
+            <div className="absolute top-12 left-0 bg-white rounded-2xl shadow-2xl w-72 z-50 overflow-hidden">
+              {/* User info section */}
               <div
-                className="flex flex-col items-center gap-2 px-4 py-5"
+                className="flex flex-col items-center gap-3 px-4 py-5"
                 style={{ background: 'linear-gradient(135deg, #1e3a5f, #1d4ed8)' }}
               >
                 <div className="w-14 h-14 rounded-full border-2 border-white/50 flex items-center justify-center overflow-hidden"
@@ -68,12 +71,25 @@ export default function AppHeader() {
                 )}
                 <p className="text-xs text-blue-200 text-center break-all">{user?.email}</p>
               </div>
-              <button
-                onClick={() => signOut(auth)}
-                className="w-full flex items-center justify-center gap-2 text-sm text-red-500 font-semibold py-4 hover:bg-red-50 transition-colors"
-              >
-                <LogOut size={15} /> Sign Out
-              </button>
+
+              {/* Buttons */}
+              <div className="px-4 py-2 space-y-1">
+                <button
+                  onClick={() => {
+                    navigate('/settings/profile')
+                    setShowProfile(false)
+                  }}
+                  className="w-full flex items-center justify-center gap-2 text-sm text-blue-600 font-semibold py-3 hover:bg-blue-50 transition-colors rounded-lg"
+                >
+                  <User size={15} /> View Profile
+                </button>
+                <button
+                  onClick={() => signOut(auth)}
+                  className="w-full flex items-center justify-center gap-2 text-sm text-red-500 font-semibold py-3 hover:bg-red-50 transition-colors rounded-lg"
+                >
+                  <LogOut size={15} /> Sign Out
+                </button>
+              </div>
             </div>
           )}
         </div>
