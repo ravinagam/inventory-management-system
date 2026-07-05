@@ -4,6 +4,7 @@ import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from './lib/firebase'
 import useAuthStore from './store/authStore'
 import ProtectedRoute from './components/ProtectedRoute'
+import ProtectedAdminRoute from './components/ProtectedAdminRoute'
 import Layout from './components/Layout'
 import Dashboard from './pages/Dashboard'
 import ProductList from './pages/Products'
@@ -16,6 +17,7 @@ import CompanyNamePage from './pages/Settings/CompanyName'
 import ProfilePage from './pages/Settings/Profile'
 import ConfigPage from './pages/Config'
 import EditProduct from './pages/Config/EditProduct'
+import AdminDashboard from './pages/Admin'
 
 export default function App() {
   const setUser = useAuthStore((s) => s.setUser)
@@ -67,22 +69,40 @@ export default function App() {
   return (
     <BrowserRouter>
       <ProtectedRoute>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/products" element={<ProductList />} />
-            <Route path="/products/add" element={<ProductForm />} />
-            <Route path="/products/:id" element={<ProductForm />} />
-            <Route path="/inventory" element={<InventoryUpdate />} />
-            <Route path="/audit" element={<DailyAudit />} />
-            <Route path="/reports" element={<Reports />} />
-            <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/settings/company" element={<CompanyNamePage />} />
-            <Route path="/settings/profile" element={<ProfilePage />} />
-            <Route path="/config" element={<ConfigPage />} />
-            <Route path="/config/products/:id" element={<EditProduct />} />
-          </Routes>
-        </Layout>
+        <Routes>
+          {/* Admin Routes (outside Layout) */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedAdminRoute>
+                <AdminDashboard />
+              </ProtectedAdminRoute>
+            }
+          />
+
+          {/* App Routes (with Layout) */}
+          <Route
+            path="/*"
+            element={
+              <Layout>
+                <Routes>
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/products" element={<ProductList />} />
+                  <Route path="/products/add" element={<ProductForm />} />
+                  <Route path="/products/:id" element={<ProductForm />} />
+                  <Route path="/inventory" element={<InventoryUpdate />} />
+                  <Route path="/audit" element={<DailyAudit />} />
+                  <Route path="/reports" element={<Reports />} />
+                  <Route path="/settings" element={<SettingsPage />} />
+                  <Route path="/settings/company" element={<CompanyNamePage />} />
+                  <Route path="/settings/profile" element={<ProfilePage />} />
+                  <Route path="/config" element={<ConfigPage />} />
+                  <Route path="/config/products/:id" element={<EditProduct />} />
+                </Routes>
+              </Layout>
+            }
+          />
+        </Routes>
       </ProtectedRoute>
     </BrowserRouter>
   )

@@ -108,3 +108,10 @@ exports.acceptInvite = functions.https.onCall(async (data, context) => {
   if (!context.auth) throw new functions.https.HttpsError('unauthenticated', 'User not authenticated');
   return { success: true, message: 'Invite acceptance coming soon' };
 });
+
+// Admin Functions
+const adminFunctions = require('./src/adminFunctions');
+exports.getAdminStats = adminFunctions.getAdminStats;
+exports.getAllCompanies = adminFunctions.getAllCompanies;
+exports.getAllUsers = adminFunctions.getAllUsers;
+exports.getCompanyDetails = adminFunctions.getCompanyDetails;
