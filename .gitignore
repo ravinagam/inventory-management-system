@@ -34,3 +34,4 @@ backups/
 *.njsproj
 *.sln
 *.sw?
+firebase-key.json

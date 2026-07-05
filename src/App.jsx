@@ -29,17 +29,19 @@ export default function App() {
     const unsub = onAuthStateChanged(auth, async (user) => {
       if (user) {
         try {
-          // Get ID token result to extract custom claims (companyId, role)
+          // Get ID token result to extract custom claims (companyId, role, admin)
           // Force refresh (true) to get latest custom claims from Firebase
           const idTokenResult = await user.getIdTokenResult(true)
           let companyId = idTokenResult.claims.companyId || null
           let role = idTokenResult.claims.role || null
+          const isAdmin = idTokenResult.claims.admin === true
 
-          console.log('🔍 DEBUG: companyId from token:', companyId, 'role:', role)
+          console.log('🔍 DEBUG: companyId from token:', companyId, 'role:', role, 'admin:', isAdmin)
 
           // Retry mechanism: if no claims found, wait and try again
           // (Firebase takes ~1 second to propagate custom claims after they're set)
-          if (!companyId) {
+          // Skip retry for admin users (they don't have companyId)
+          if (!companyId && !isAdmin) {
             console.log('⚠️ No companyId in token, retrying in 2 seconds...')
             await new Promise(resolve => setTimeout(resolve, 2000))
 
